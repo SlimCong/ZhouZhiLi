@@ -1,0 +1,3398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《周之礼》——东周列国争霸</title>
+<style>
+:root{
+  --paper:#f6f1e6; --paper2:#efe7d4; --ink:#3b2f24; --ink2:#6b5a45;
+  --seal:#a83232; --seal2:#8c2626; --gold:#b8860b; --jade:#2e6e4e;
+  --line:#d8cbb0; --card:#fffdf6; --hi:#fff3d6;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:"Noto Serif SC","Songti SC","SimSun",serif; background:var(--paper); color:var(--ink); min-height:100vh;}
+button{font-family:inherit; cursor:pointer;}
+/* ---------- 开局 ---------- */
+#setup{max-width:860px; margin:0 auto; padding:36px 20px;}
+#setup h1{font-size:34px; letter-spacing:8px; text-align:center; color:var(--seal); margin-bottom:6px;}
+#setup .sub{text-align:center; color:var(--ink2); margin-bottom:26px; letter-spacing:2px;}
+.panel{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:16px; box-shadow:0 2px 8px rgba(60,40,10,.06);}
+.panel h3{color:var(--seal2); margin-bottom:10px; font-size:16px; letter-spacing:2px;}
+.kingdoms{display:flex; flex-wrap:wrap; gap:8px;}
+.kbtn{border:1px solid var(--line); background:var(--paper2); border-radius:8px; padding:8px 12px; font-size:14px;}
+.kbtn.sel{background:var(--seal); color:#fff; border-color:var(--seal2);}
+.kdesc{margin-top:10px; font-size:13px; color:var(--ink2); min-height:20px;}
+.row{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+.npbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper2);font-size:15px;}
+.npbtn.sel{background:var(--seal);color:#fff;}
+#startBtn{background:var(--seal);color:#fff;border:none;border-radius:8px;padding:12px 46px;font-size:18px;letter-spacing:6px;}
+#startBtn:hover{background:var(--seal2);}
+#tutBtn{background:var(--card);color:var(--seal2);border:1px solid var(--seal2);border-radius:8px;padding:12px 26px;font-size:16px;letter-spacing:3px;}
+#tutBtn:hover{background:var(--hi);}
+/* ---------- 游戏界面 ---------- */
+#game{display:none; max-width:1180px; margin:0 auto; padding:12px 14px 20px;}
+#topbar{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 14px; margin-bottom:10px; font-size:14px;}
+#topbar .era{font-weight:bold; color:var(--seal); letter-spacing:2px;}
+#topbar .fx{color:var(--gold);}
+#oppRow{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;}
+.pcard{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:7px 10px; min-width:150px; font-size:13px; position:relative;}
+.pcard.cur{outline:2px solid var(--seal); background:var(--hi);}
+.pcard .nm{font-weight:bold;}
+.pcard .kd{color:var(--seal2); font-size:12px;}
+.pcard .tags{margin-top:3px; display:flex; flex-wrap:wrap; gap:3px;}
+.tag{font-size:11px; background:var(--paper2); border:1px solid var(--line); border-radius:4px; padding:0 5px;}
+.tag.dep{background:#e8efe4; border-color:#b9d0b4;}
+.tag.vas{background:#f3e6e6; border-color:#dcb9b9; color:var(--seal2);}
+.tag.emp{background:var(--seal); color:#fff; border-color:var(--seal2);}
+#mid{display:flex; gap:10px; margin-bottom:10px; align-items:stretch;}
+#piles{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:13px; flex:0 0 232px; width:232px; max-width:232px; word-break:break-word;}
+#piles>div{line-height:1.75;}
+#piles .dice{font-size:22px; color:var(--seal); font-weight:bold; margin:4px 0;}
+#logBox{flex:1 1 0; min-width:0; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 12px; height:170px; overflow-y:auto; font-size:13px; line-height:1.65;}
+#logBox .sys{color:var(--ink2);}
+#logBox .war{color:var(--seal2);}
+#logBox .good{color:var(--jade);}
+#logBox .gold{color:var(--gold); font-weight:bold;}
+#meArea{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px;}
+#meTop{display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:6px; font-size:14px;}
+#meActions{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;}
+.abtn{background:var(--paper2); border:1px solid var(--line); border-radius:6px; padding:6px 12px; font-size:13px;}
+.abtn:hover{background:var(--hi); border-color:var(--gold);}
+.abtn:disabled{opacity:.4; cursor:not-allowed;}
+.abtn.main{background:var(--seal); color:#fff; border-color:var(--seal2);}
+.abtn.main:hover{background:var(--seal2);}
+.abtn.mini{padding:2px 9px; font-size:12px; background:#f3ecfa; border-color:#ccb9e0;}
+.abtn.mini:hover{background:#eadff7;}
+#depRow{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; font-size:12px; align-items:center;}
+#depRow .lbl{color:var(--ink2);}
+#handRow{display:flex; gap:6px; flex-wrap:wrap;}
+.hcard{background:var(--card); border:1px solid var(--line); border-radius:7px; padding:6px 9px; font-size:13px; min-width:58px; text-align:center; box-shadow:0 1px 3px rgba(60,40,10,.08);}
+.hcard b{display:block; font-size:14px;}
+.hcard small{color:var(--ink2); font-size:11px;}
+.hcard.t基础{background:#f2ede0;}
+.hcard.t臣{background:#e9f0fa; border-color:#b9c8e4;}
+.hcard.t将{background:#faeaea; border-color:#e0b9b9;}
+.hcard.t技能{background:#f3ecfa; border-color:#ccb9e0;}
+.hcard.t礼器{background:#fdf6e0; border-color:#e0cf9a;}
+.hcard.t事件{background:#fbe9e0; border-color:#e0b9a0;}
+.hcard:hover{outline:2px solid var(--gold);}
+/* ---------- 弹窗 ---------- */
+#modalMask{display:none; position:fixed; inset:0; background:rgba(40,28,12,.45); z-index:50; align-items:center; justify-content:center;}
+#modal{background:var(--paper); border:2px solid var(--seal2); border-radius:12px; max-width:720px; width:92%; max-height:86vh; overflow-y:auto; padding:18px 22px;}
+#modal h3{color:var(--seal2); margin-bottom:8px; letter-spacing:2px;}
+#modal .mdesc{font-size:14px; color:var(--ink2); margin-bottom:12px; line-height:1.6;}
+#modal .opts{display:flex; flex-direction:column; gap:6px;}
+.mopt{text-align:left; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:9px 12px; font-size:14px;}
+.mopt:hover{background:var(--hi); border-color:var(--gold);}
+.mopt small{display:block; color:var(--ink2); font-size:12px; margin-top:2px;}
+.mopt.sel{outline:2px solid var(--seal); background:var(--hi);}
+.ref{border-bottom:1px dotted currentColor; cursor:help;}
+#logBox .ref{color:inherit;}
+.mrow{display:flex; gap:8px; justify-content:flex-end; margin-top:14px;}
+.mrow button{border-radius:6px; padding:8px 18px; font-size:14px; border:1px solid var(--line); background:var(--card);}
+.mrow button.ok{background:var(--seal); color:#fff; border-color:var(--seal2);}
+#toast{position:fixed; top:16px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:9px 20px; border-radius:20px; font-size:14px; z-index:99; display:none; max-width:80%;}
+#over{display:none; position:fixed; inset:0; background:rgba(40,28,12,.7); z-index:80; align-items:center; justify-content:center;}
+#overBox{background:var(--paper); border:2px solid var(--seal2); border-radius:14px; padding:34px 46px; text-align:center;}
+#overBox h2{color:var(--seal); font-size:30px; letter-spacing:6px; margin-bottom:12px;}
+#overBox p{color:var(--ink2); margin-bottom:6px;}
+/* ---------- 联机大厅 ---------- */
+#netPanel input{border:1px solid var(--line); border-radius:6px; padding:6px 10px; font-size:13px; background:var(--card); color:var(--ink); font-family:inherit;}
+#netPanel input:disabled{opacity:.6;}
+#netPanel .hint{font-size:12px; color:var(--ink2); line-height:1.85; margin-top:8px;}
+.netseat{display:inline-block; background:var(--paper2); border:1px solid var(--line); border-radius:6px; padding:3px 10px; margin:2px 6px 2px 0; font-size:13px;}
+#netList{font-size:13px; line-height:2;}
+#netStartBtn:disabled{opacity:.45;}
+</style>
+</head>
+<body>
+
+<!-- ============ 开局设置 ============ -->
+<div id="setup">
+  <h1>周 之 礼</h1>
+  <div class="sub">东周列国 · 合纵连横 · 问鼎天下</div>
+  <div class="panel">
+    <h3>◈ 诸侯国（你的国家）</h3>
+    <div class="kingdoms" id="kdList"></div>
+    <div class="kdesc" id="kdDesc"></div>
+  </div>
+  <div class="panel">
+    <h3>◈ 对局规模</h3>
+    <div class="row" id="npRow">
+      <span style="font-size:14px">总人数（含你）：</span>
+      <span id="npBtns"></span>
+      <span style="font-size:12px;color:var(--ink2)">规则支持 4–10 人，AI 诸侯将随机选择国家与性格</span>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>◈ 胜利条件（满足其一即胜）</h3>
+    <div style="font-size:14px;line-height:1.9">
+      ⚔ <b>战争胜利</b>：消灭所有其他诸侯。<br>
+      ⚖ <b>商业胜利</b>：手牌布币总值（礼器×2）≥ 其余所有玩家城池之和 ×2。<br>
+      🏛 <b>宗法胜利</b>：所有其他玩家皆为你的直接或间接附庸。
+    </div>
+  </div>
+  <div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:22px">
+    <button id="tutBtn">🎓 教程模式</button>
+    <button id="startBtn">逐 鹿 中 原</button>
+  </div>
+  <div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:12px">
+    <button id="speedBtn" style="background:var(--card);color:var(--jade);border:1px solid var(--jade);border-radius:8px;padding:9px 22px;font-size:14px;letter-spacing:2px">⚡ 极速模式（3人局 · 5城5牌）</button>
+    <button id="randBtn" style="background:var(--card);color:var(--gold);border:1px solid var(--gold);border-radius:8px;padding:9px 22px;font-size:14px;letter-spacing:2px">🎲 随机国家开局</button>
+  </div>
+  <div class="panel" id="netPanel">
+    <h3>◈ 联机对战（P2P · WebRTC DataChannel）</h3>
+    <div id="netSetup">
+      <div class="row" style="font-size:13px">
+        <span>昵称：</span><input id="netName" placeholder="你的名字" size="10">
+        <span>房间号：</span><input id="netRoom" value="zzl" size="10">
+      </div>
+      <div class="row" style="font-size:13px;margin-top:6px">
+        <span>信令地址：</span><input id="netSignal" size="34">
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="abtn main" id="netHostBtn">🏠 创建房间（我已运行 signal-server.js）</button>
+        <button class="abtn" id="netJoinBtn">🚪 加入房间</button>
+      </div>
+      <div class="hint" id="netTip">
+        房主在自己电脑上运行 <b>node signal-server.js</b>，把打印出的地址发给朋友；<br>
+        朋友们打开该地址 → 填昵称 → 点「🚪 加入房间」即可。建立连接后数据直连 P2P，不再经过服务器。
+      </div>
+    </div>
+    <div id="netRoomBox" style="display:none">
+      <div id="netWho" style="font-size:13px;margin-bottom:4px"></div>
+      <div id="netList"></div>
+      <div id="netHostAct" style="margin-top:10px;display:none">
+        <button class="abtn main" id="netStartBtn">逐 鹿 中 原（联机）</button>
+        <button class="abtn" id="netCancelBtn">✖ 退出联机</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 对局界面 ============ -->
+<div id="game">
+  <div id="topbar">
+    <span class="era" id="eraLab">春秋时代</span>
+    <span id="roundLab"></span>
+    <span id="taishiLab"></span>
+    <span class="fx" id="diceLab" onclick="showLiuyi()" style="cursor:pointer" title="点击查看君子六艺详解"></span>
+    <span id="pileLab"></span>
+    <button class="abtn" onclick="showRules()">📖 规则速览</button>
+  </div>
+  <div id="oppRow"></div>
+  <div id="mid">
+    <div id="piles">
+      <div>周天子牌堆：<b id="tzN"></b> 张</div>
+      <div>普通牌堆：<b id="noN"></b> 张</div>
+      <div>弃牌堆：<b id="diN"></b> 张</div>
+      <div class="dice" id="diceBig" onclick="showLiuyi()" style="cursor:pointer" title="点击查看君子六艺详解">骰：—</div>
+      <div id="buyRoadLab" style="color:var(--gold);font-size:12px"></div>
+      <div id="tableLab" style="font-size:12px;color:var(--seal2)"></div>
+    </div>
+    <div id="logBox"></div>
+  </div>
+  <div id="meArea">
+    <div id="meTop"></div>
+    <div id="meActions"></div>
+    <div id="depRow"></div>
+    <div id="handRow"></div>
+  </div>
+</div>
+
+<div id="modalMask"><div id="modal"></div></div>
+<div id="toast"></div>
+<div id="over"><div id="overBox"></div></div>
+
+<script>
+/* =====================================================================
+   《周之礼》网页版  —— 单文件实现
+   ===================================================================== */
+
+/* ---------------- 基础工具 ---------------- */
+let UID = 1;
+const rnd = n => Math.floor(Math.random()*n);
+const pick = a => a[rnd(a.length)];
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function stripTags(s){ return String(s).replace(/<[^>]*>/g,''); }
+// esc：先剥离 HTML 标签，再转义 —— 避免 <b> 这类标记在 title 属性/转义文本里被当成正文显示
+const esc = s => stripTags(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $ = id => document.getElementById(id);
+
+/* ---------------- 诸侯国定义 ---------------- */
+const KINGDOMS = [
+ {id:'齐', ruler:'齐侯', policy:'鱼盐之利', src:'《史记·齐太公世家》「通商工之业，便鱼盐之利」',
+  desc:'布币不占手牌位；<b>2 张布币可当 1 张【盾】使用</b>；进攻消耗粮草+1',
+  atkMod:1, coinFree:true, twoCoinShield:true},
+ {id:'秦', ruler:'秦公', policy:'耕战', src:'商鞅变法核心「农战」，秦以耕战立国',
+  desc:'进攻粮草消耗-1；所有基础牌可当【戈】使用；<b>无法装备礼器、无法交易，称帝前手牌上限-2</b>',
+  atkMod:-1, allAsGe:true, noRelic:true, noTrade:true, handMinusBeforeEmperor:2},
+ {id:'燕', ruler:'燕侯', policy:'苦寒之守', src:'燕处北地苦寒，易守难攻',
+  desc:'平时被进攻时敌方消耗+1；只剩1城时敌方进攻需+3粮草；<b>每回合首次主动进攻需打出2张【戈】</b>', defMod:1, lastCityGuard:3, firstAtk2Ge:true},
+ {id:'楚', ruler:'楚王', policy:'地广粟多', src:'《战国策》楚「地方五千里，带甲百万，粟支十年」',
+  desc:'粮草不占手牌位；所有基础牌可当【粮草】或【盾】使用；<b>主动进攻粮草消耗+1</b>', grainFree:true, allAsBasic:true, atkMod:1},
+ {id:'赵', ruler:'赵侯', policy:'胡服骑射', src:'赵武灵王胡服骑射，赵军善骑射，攻势凌厉',
+  desc:'进攻消耗粮草+1；<b>每回合首次打出【戈】效果+1（伤害+1）</b>', atkMod:1, firstGePlus:1},
+ {id:'魏', ruler:'魏侯', policy:'李悝变法', src:'魏文侯用李悝变法，法度可复施',
+  desc:'可用4布币强制购买他人已部署的臣或将（每回合1次）；<b>部署臣/将时需弃置1张牌</b>', buyDeployed:4, deployTax:true},
+ {id:'韩', ruler:'韩侯', policy:'申子之术', src:'韩昭侯用申不害「术」治，将帅可复用',
+  desc:'臣/将部署上场时可触发一次其打出效果；<b>手牌上限-1</b>', deployPlay:true, handMinus:1},
+ {id:'晋', ruler:'晋侯', policy:'三家分晋', src:'晋国卿大夫势大，终致三家分晋——臣强易叛',
+  desc:'手牌上限+1；<b>自己的附庸可在其出牌阶段随时谋反</b>', handPlus:1, freeRebel:true},
+ {id:'鲁', ruler:'鲁公', policy:'周礼尽在', src:'《左传》「周礼尽在鲁矣」，鲁为礼乐之邦',
+  desc:'克己复礼纳贡牌数-1', kejiMinus:1},
+ {id:'宋', ruler:'宋公', policy:'殷商遗风', src:'宋为殷商后裔，善商贾；然国力弱，攻战不利',
+  desc:'布币不占手牌位；可用4布币强制购买任意玩家1座城（每回合一次）；进攻消耗+2',
+  coinFree:true, buyCity:4, atkMod:2},
+ {id:'卫', ruler:'卫侯', policy:'卫多君子', src:'《论语》「君子哉若人」——卫多君子，然货赂亦公行',
+  desc:'<b>臣/将不占手牌位；无法弃置臣/将——只能打出、交易或朝贡</b>', mgFree:true, mgNoDrop:true},
+ {id:'中山', ruler:'中山君', policy:'死而复社', src:'中山国小而民悍，赵灭之而复叛，再亡而复立',
+  desc:'<b>首次被灭国时最后的城池保留，2轮后复国；复国后手牌上限-2</b>', reborn:true},
+ {id:'巴', ruler:'巴君', policy:'巴师勇锐', src:'《华阳国志》「巴师勇锐，歌舞以凌殷人」',
+  desc:'城池<5时，每少1城，主动进攻消耗粮草-1；<b>只剩1城时打出【戈】效果+1（伤害+1）</b>', ba:true},
+ {id:'蜀', ruler:'蜀王', policy:'天府之国', src:'《战国策》「天府之国，沃野千里」，守易攻难',
+  desc:'主动进攻消耗粮草+1；被进攻时敌方粮草消耗+1；<b>粮草不占手牌位</b>', atkMod:1, defMod:1, grainFree:true},
+];
+
+/* ---------------- 卡牌定义 ---------------- */
+const MINISTERS = {
+ '管仲':{deploy:'【通货积财】所有手牌可当布币支付；布币不计入手牌上限',
+         play:'【尊王攘夷】纳贡天子牌堆4张牌，指定攘夷目标：其余玩家必须对其打出戈或盾，否则被你没收1张手牌；因此打出的戈所攻下的城池全部归你'},
+ '晏婴':{deploy:'【折冲樽俎】被攻击时可弃1张手牌使攻击无效',
+         play:'【晏子使楚】获取一名玩家手牌中所有布币与粮草'},
+ '孙膑':{deploy:'【围魏救赵】其他玩家打出【戈】攻击你时，须赠予你 1 张手牌（其无手牌则免）',
+         play:'【减灶诱敌】弃掉你的全部手牌，然后从牌堆取回同等数量的牌'},
+ '商鞅':{deploy:'【垦草令】全场禁止交易；除你以外，每人最多部署1张臣/将，超额部署者收回手牌',
+         play:'【刑无等级】夺取全场城池最多玩家2座城池'},
+ '范蠡':{deploy:'【三聚三散】每回合限一次：赠予1名玩家3张手牌，你摸3张牌', act:'三聚三散', actLabel:'🪙 三聚三散',
+         play:'【鸟尽弓藏】弃置你场上全部已部署将/臣，每张获得2布币并摸1张牌'},
+ '子产':{deploy:'【通商有度】全场每次发生交易，你摸1张牌（不限次数）',
+         play:'【丘赋之制】全场亮出所有【戈】，你按戈的总数摸牌'},
+ '苏秦':{deploy:'【悬梁刺股】每回合限一次：弃置至多3张手牌，重摸等量牌', act:'悬梁刺股', actLabel:'📚 悬梁刺股',
+         play:'【六国合纵】出牌阶段：将粮草分赠给其他国家（每国1张），每赠出1张粮草，就对全场城池最多的玩家造成1点城池伤害；攻下的城池全部归你'},
+ '张仪':{deploy:'【连横夺相】出牌阶段限一次：指定1名玩家，将其已部署的臣或将拆回其手牌', act:'连横夺相', actLabel:'🗡 连横夺相',
+         play:'【割地欺楚】转移城池给对方，并强制获得其全部手牌；转移数量＝对方手牌数÷2（向上取整），城池不足则无法发动'},
+ '孔子':{deploy:'【复礼宗风】出牌阶段限一次：自己在内所有玩家各纳贡1张牌至周天子牌堆，并恢复1次掷骰', act:'复礼宗风', actLabel:'🙇 复礼宗风',
+         play:'【礼乐征伐】所有其他玩家各向你纳贡1张手牌，并恢复1次掷骰'},
+ '屈原':{deploy:'【明于治乱】每轮开始时，你可查看周天子牌堆顶的 5 张牌',
+         play:'【离骚·天问】本回合所有人的手牌对你个人公开'},
+};
+const GENERALS = {
+ '孙武':{deploy:'【三令五申】你的附庸协助进攻时，单次攻击造成2城损失',
+         play:'【兵家至圣】本回合你的所有【戈】攻击无需支付粮草/布币消耗，且无视距离'},
+ '伍子胥':{deploy:'【掘墓鞭尸】你消灭玩家时，摸3张牌并获得2布币',
+         play:'【一夜白头】弃置至少3张手牌，目标损失等量城池（上限5）'},
+ '廉颇':{deploy:'【负荆请罪】你被攻击时，可给对方任意 1 张手牌，代替打出【盾】化解本次攻击（每回合限一次）',
+         play:'【破燕拜相】一次性打出 5 张【戈】+1 张【粮草】，对目标造成 5 点城池伤害，无法被防御'},
+ '曹刿':{deploy:'【一鼓作气】你每回合的首次攻击，伤害 +1',
+         play:'【辙乱旗靡】本回合你攻击时，若目标手牌 ≥5，本次伤害 +1'},
+ '赵奢':{deploy:'【阏与之战】攻击距离≥2的玩家消耗-1，且无需买路',
+         play:'【奉公守法】本回合技能牌无法对你生效；每被攻击1次获1布币'},
+ '白起':{deploy:'【拔城升爵】每令敌方损失1座城池，你从牌堆抽1张牌',
+         play:'【长平坑卒】指定一名城池≥5的玩家，双方各掷1次六面骰：你点数≥对方则对方损失3座城池，反之你损失2座城池'},
+ '王翦':{deploy:'【请田自保】受到城池伤害时可索要1布币，对方拒绝则伤害-1（每回合一次）',
+         play:'【六十万军】弃2张手牌，本回合每次攻击可额外波及目标的一名相邻玩家'},
+ '乐毅':{deploy:'【下齐七十城】你的攻击令敌方损失城池时，额外强制对方弃置1张手牌（对方无手牌则无效）',
+         play:'【济上之盟】指定你的附庸：其城池归零、手牌归你，其选择重新为附庸或出局'},
+ '赵括':{deploy:'【纸上谈兵】本回合内，你打出的第 6 张及之后的【戈】无法被【盾】防住',
+         play:'【长平之败】指定一名玩家掷骰：点数≥3 则你获得其 3 座城池；<3 则你将全部手牌交给对方'},
+ '田单':{deploy:'【火牛阵】被攻击时可弃1张粮草，令攻击方转移1座城池给你（城池不可摧毁，只能转移）',
+         play:'【复国破燕】若你城池≤3，立即补至5座，并从弃牌堆回收至多2张牌'},
+};
+const SKILLS = {
+ '始计庙算':'查看一名玩家全部手牌，并按其中戈的数量摸牌（上限3）',
+ '作战速胜':'本回合每张戈命中时额外造成1城伤害',
+ '谋攻克敌':'弃2粮草，对距离≥2的玩家造成1城伤害（无法被盾抵消）',
+ '军形先胜':'获得2层【先胜】护盾：可完全抵挡1次攻击伤害，并可令1张针对你的技能牌失效（护盾一直有效，直到被消耗，不随回合或轮次消失）',
+ '兵势奇正':'从普通牌堆中新部署1张将牌到你的场上（替换原有武将）',
+ '虚实避实':'本回合指定一名玩家：其盾失效，你攻其消耗-2',
+ '军争迂直':'与一名玩家互换座位，全场距离立刻重新结算（永久生效）',
+ '九变杂于':'本回合你的攻击伤害+1，但攻击消耗+1',
+ '行军处军':'收回场上全部已部署牌至手牌，并摸等量牌',
+ '用间五俱':'指定任意附庸本回合临时听命于你：你夺取其1座城与2张手牌',
+ '贵公去私':'所有其他玩家各转移1张手牌给你（由该玩家自行选择；无手牌者不受影响）',
+ '仲春纪':'从普通牌堆取「玩家数+1」张牌：你领取2张，其余按出牌顺序由其他玩家领取；随后所有人各朝贡1张牌至周天子牌堆',
+ '圜道循环':'弃牌堆最上方5张洗入普通牌堆，你摸1张牌',
+ '贵生重己':'赠与自选的一名其他玩家1座城池，然后从普通牌堆摸6张牌',
+ '当染慎交':'指定两名玩家：本回合他们无法攻击你、无法对你用技能牌',
+ '劝学尊师':'从普通牌堆中新部署1张臣牌到你的场上（替换原有文臣）',
+ '首时待机':'下回合跳过出牌阶段，但摸牌阶段多摸3张牌',
+ '义赏诛暴':'指定城池比你多的玩家：其交1布币或1粮草，否则损失1城',
+ '别类察今':'从弃牌堆中拿回最上面的3张牌',
+ '任数用众':'本回合场上每有一名附庸（归属不限），你可免费打1张戈（上限3次）',
+};
+const RELICS = {
+ '和氏璧':'上古礼器 · 价值2布币（支付过路费时仅等价1布币）。被强制交易或被取走1张牌时，你可以拒绝（每局一次）',
+ '随侯珠':'上古礼器 · 价值2布币（支付过路费时仅等价1布币）。每回合可免费换牌1次（无需弃置布币）',
+ '九鼎':'上古礼器 · 价值2布币（支付过路费时仅等价1布币）。你的称帝条件减半',
+ '越王勾践剑':'上古礼器 · 价值2布币（支付过路费时仅等价1布币）。你被攻击结算完毕后，可从牌堆领取 1 张牌',
+ '吴王夫差矛':'上古礼器 · 价值2布币（支付过路费时仅等价1布币）。其他玩家在自己的回合外从牌堆摸牌时（不含摸牌阶段、附庸摸牌、凭空生成、弃牌堆回收），你可选择其中 1 人，抢走其摸到的 1 张牌',
+ '王子午鼎':'上古礼器 · 价值2布币（支付过路费时仅等价1布币）。你每回合无需纳贡（身为附庸时同样适用）',
+ '吴王阖闾剑':'上古礼器 · 价值2布币（支付过路费时仅等价1布币）。你每回合的首次攻击，粮草消耗 -1',
+ '秦公镈':'上古礼器 · 价值2布币（支付过路费时仅等价1布币）。你每次部署臣/将时，摸 1 张牌',
+ '杜虎符':'上古礼器 · 价值2布币（支付过路费时仅等价1布币）。你买路所需的资源 -1（即免费借道）',
+ '传国玉玺':'帝王之器 · 价值2布币。称帝后，由【和氏璧】+任意其他礼器铸造而成——两张原牌被<b>彻底摧毁、永不再回牌堆</b>。你每轮摸牌阶段多摸 1 张',
+};
+/* 可洗入牌堆的礼器（传国玉玺只能通过铸造获得，不在牌堆中） */
+const RELIC_DECK=['和氏璧','随侯珠','九鼎','越王勾践剑','吴王夫差矛','王子午鼎','吴王阖闾剑','秦公镈','杜虎符'];
+/* ---------------- 事件牌 ---------------- */
+const EVENTS = {
+ '灾年':'事件 · 所有人进攻消耗粮草-1',
+ '瘟疫':'事件 · 打出者获得瘟疫状态，每轮向下家传递，传递一整圈后消失；进攻瘟疫状态者可少支付1点粮草',
+ '弑君':'事件 · 所有人可自选出1次【戈】攻击周天子：春秋时打出后可从周天子牌堆获得2张牌；战国时对称帝者出戈且粮草消耗为0（每人生效一次）',
+ '流言四起':'事件 · 所有玩家手牌公开（互相可见）',
+ '官山海':'事件 · 所有人摸牌阶段多摸1张牌',
+ '天子征伐':'事件 · 立即结算：称帝者转移1座城池给城池最少的玩家（无人称帝则无效退回）',
+ '厉兵秣马':'事件 · 立即结算：所有人各获得1张【戈】',
+ '周王赏赐':'事件 · 立即结算：所有人各获得1张【粮草】',
+ '天降祥瑞':'事件 · 立即结算：所有人各摸1张牌',
+ '尊王攘夷令':'事件 · 所有人对城池最少的玩家攻击无需支付粮草',
+ '礼崩乐坏':'事件 · 所有附庸可攻击宗主（犯上不受阻）',
+ '百家争鸣':'事件 · 所有人可免费使用1次技能牌，打出后立即拿回手牌（每人生效一次）',
+ '烽火戏诸侯':'事件 · 立即结算：所有人必须不限目标地打出1次【戈】（发起一次免费攻击），无戈者弃2张手牌，无牌者忽略',
+};
+function cardDesc(c){
+  if(c.type==='臣') return MINISTERS[c.name];
+  if(c.type==='将') return GENERALS[c.name];
+  if(c.type==='技能') return {play:SKILLS[c.name]};
+  if(c.type==='礼器') return {deploy:RELICS[c.name]};
+  if(c.type==='事件') return {play:EVENTS[c.name]};
+  const b={'戈':'攻击牌：配合粮草/布币发起攻击','盾':'防御牌：抵消一次戈的攻击',
+           '粮草':'支付攻击距离消耗，可被布币替代','布币':'交易货币；弃置1张可从普通牌堆换1张牌'};
+  return {deploy:b[c.name]};
+}
+
+/* ---------------- 卡牌速查（悬停解释） ---------------- */
+let _cardTips=null;
+function cardTips(){
+  if(_cardTips) return _cardTips;
+  const t={};
+  const addTip=(key,val)=>{ if(!key||!val) return; t[key]= t[key] ? (t[key]+'\n'+val) : val; };
+  Object.entries(MINISTERS).forEach(([k,v])=>{
+    t[k]=`【${k}·文臣】\n部署：${v.deploy}\n打出：${v.play}`;
+    const a=(v.deploy||'').match(/^【([^】]+)】/); if(a) addTip(a[1],`【${k}·文臣部署技】\n${v.deploy}`);
+    const b=(v.play||'').match(/^【([^】]+)】/); if(b) addTip(b[1],`【${k}·文臣打出技】\n${v.play}`);
+  });
+  Object.entries(GENERALS).forEach(([k,v])=>{
+    t[k]=`【${k}·武将】\n部署：${v.deploy}\n打出：${v.play}`;
+    const a=(v.deploy||'').match(/^【([^】]+)】/); if(a) addTip(a[1],`【${k}·武将部署技】\n${v.deploy}`);
+    const b=(v.play||'').match(/^【([^】]+)】/); if(b) addTip(b[1],`【${k}·武将打出技】\n${v.play}`);
+  });
+  Object.entries(SKILLS).forEach(([k,v])=>t[k]=`【${k}·技能牌】\n${v}`);
+  Object.entries(RELICS).forEach(([k,v])=>t[k]=`【${k}·礼器】\n${v}`);
+  Object.entries(EVENTS).forEach(([k,v])=>t[k]=`【${k}·事件牌】\n${v}`);
+  KINGDOMS.forEach(k=>t[k.id+'国']=`【${k.id}国·国策：${k.policy}】\n${k.desc}\n典故：${k.src||''}`);
+  KINGDOMS.forEach(k=>t[k.policy]=`【${k.id}国·国策：${k.policy}】\n${k.desc}`);
+  t['戈']='【戈·基础牌】攻击牌。打出戈发起攻击时需额外消耗粮草/布币。可一次打出多张【戈】：每多打出 1 张，本次城池伤害 +1，但对方仍只需打出 1 张【盾】即可把本次攻击全部抵消。';
+  t['盾']='【盾·基础牌】防御牌。被攻击时打出 1 张盾，可抵消一次【戈】的攻击——无论对方打出几张戈，1 张盾即可全部挡下（齐国可用 2 张布币当 1 张盾）。';
+  t['粮草']='【粮草·基础牌】用于支付攻击距离消耗，可被布币替代。';
+  t['布币']='【布币·基础牌】交易货币，可替代粮草支付；主动弃置1张可从普通牌堆换1张牌。';
+  t['买路']='【买路】攻击距离≥2时，可向路径上的中间玩家支付 1 张资源，使本次攻击距离视为相邻（持【杜虎符】者该资源 -1 即免费；路过自己的附庸亦免收过路费）。';
+  t['礼']='【六艺·礼】城池最多者转移1城给城池最少者；若城池全等，则手牌最多者赠1张牌给手牌最少者；若完全平等，视为掷出6点。';
+  t['乐']='【六艺·乐】本回合所有玩家额外纳贡1张牌。';
+  t['射']='【六艺·射】本回合所有玩家攻击粮草消耗-1。';
+  t['御']='【六艺·御】本回合所有玩家攻击粮草消耗+1。';
+  t['书']='【六艺·书】立即重掷一次骰子，且所有附庸玩家本回合拥有谋反的机会。';
+  t['数']='【六艺·数】本回合所有玩家摸牌阶段多摸1张。';
+  t['附庸']='【附庸】城池归零后被收纳者。摸牌由宗主取走1张；宗主每回合收取其除1城外的城池；可为宗主助攻（无视距离、免粮草，需打出戈）；宗主被攻击时其手中有盾必须强制打出护主；宗主可随时查看其手牌；进攻路过自己的附庸免收过路费。';
+  t['谋反']='【谋反】春秋掷骰出5，或战国纳贡(非附庸人数)张牌后掷出5；城池须＞2。代价：一半城池与手牌转移给原宗主。';
+  t['克己复礼']='【克己复礼】战国时代特殊行动：向天子纳贡(非附庸人数)张牌，额外触发一次六艺掷骰（该效果持续到各自下个回合结束）。';
+  t['称帝']='【称帝】城池（含附庸）≥全场总城池半数（持【九鼎】则条件减半）。战国独占掷骰（效果仅自身与附庸享受）；春秋可无消耗攻击周天子。';
+  t['传国玉玺']='【传国玉玺】称帝后，若你同时拥有【和氏璧】与任意其他礼器，可将二者铸造为传国玉玺——两张原牌被彻底摧毁、永不再回牌堆；持有者每轮摸牌阶段多摸 1 张。';
+  t['周天子']='【周天子牌堆】开局所有牌都在这里；摸牌与纳贡都优先经过它（战国亦然），抽空即进入战国时代。';
+  t['弃牌堆']='【弃牌堆】打出/弃置的牌进入此处。弃牌堆只保留最近 10 张，更早的牌会被打乱并入普通牌堆。';
+  _cardTips=t;
+  return t;
+}
+function decorateRefs(html){
+  if(typeof html!=='string'||html.indexOf('【')<0) return html;
+  const T=cardTips();
+  return html.replace(/【([^】\n]{1,14})】/g,(m,nm)=>{
+    const tip=T[nm]; if(!tip) return m;
+    return `<span class="ref" title="${esc(tip)}">【${nm}】</span>`;
+  });
+}
+
+/* ---------------- 全局状态 ---------------- */
+let G=null, TF=null, RF=null;   // 全局 / 本回合标记 / 本轮标记
+
+/* ---------------- 弹窗串行队列（提示与选择共用，避免互相覆盖） ---------------- */
+let _qBusy=false, _q=[];
+function _qPush(task){ _q.push(task); _qNext(); }
+function _qNext(){
+  if(_qBusy || !_q.length) return;
+  if(!$('modalMask')) { _q.length=0; return; }
+  _qBusy=true;
+  const task=_q.shift();
+  try{ task(()=>{ _qBusy=false; _qNext(); }); }
+  catch(e){ console.error(e); _qBusy=false; setTimeout(_qNext,30); }
+}
+function _qClear(){ _q.length=0; }
+
+/* ---------------- 事件弹窗（逐个确认，不打断操作） ---------------- */
+function notify(title, html, {auto=false, tone=''}={}){
+  if(typeof __HEADLESS!=='undefined' && __HEADLESS) return;
+  if(NET.mode==='host') NET.broadcast({t:'notify', title, html, auto});   // 联机：公告同步给所有加入者
+  _qPush(done=>{
+    showModal(`<h3>${title}</h3><div class="mdesc" style="font-size:14px;line-height:1.85">${decorateRefs(html)}</div>
+      <div class="mrow">${auto?'<span style="font-size:12px;color:var(--ink2);align-self:center;margin-right:auto">约 4 秒后自动继续…</span>':''}
+      <button class="ok" id="nOk">确 定</button></div>`);
+    let fin=false;
+    const finish=()=>{ if(fin) return; fin=true; clearTimeout(tm); closeModal(); done(); };
+    const tm = auto? setTimeout(finish,4000) : null;
+    const ok=$('nOk'); if(ok) ok.onclick=finish;
+  });
+}
+
+/* ---------------- 牌堆构建 ---------------- */
+function makeCard(name,type){return {uid:UID++, name, type};}
+function buildPiles(np){
+  const pool=[];
+  [['戈',30],['盾',20],['粮草',26],['布币',22]].forEach(([n,c])=>{for(let i=0;i<c;i++)pool.push(makeCard(n,'基础'));});
+  const spec=[];
+  Object.keys(MINISTERS).forEach(k=>spec.push([k,'臣']));
+  Object.keys(GENERALS).forEach(k=>spec.push([k,'将']));
+  Object.keys(SKILLS).forEach(k=>spec.push([k,'技能']));
+  RELIC_DECK.forEach(k=>{spec.push([k,'礼器']);spec.push([k,'礼器']);});
+  Object.keys(EVENTS).forEach(k=>spec.push([k,'事件']));
+  const rep = np>=6?2:1;
+  for(let r=0;r<rep;r++) spec.forEach(([n,t])=>pool.push(makeCard(n,t)));
+  shuffle(pool);
+  G.tianzi = pool;      // 初始所有牌都在周天子牌堆
+  G.normal = [];
+  G.discard = [];
+}
+function trimDiscard(){
+  // 弃牌堆只保留最近 10 张；更早的牌打乱后并入普通牌堆
+  if(NET && NET.mode==='guest') return;   // 加入者只有牌堆张数，不做本地裁剪
+  if(!G||!G.discard) return;
+  if(G.discard.length>10){
+    const old=G.discard.splice(0,G.discard.length-10);
+    shuffle(old);
+    G.normal.unshift(...old);
+    log(`♻️ 弃牌堆只保留最近 10 张，较早的 ${old.length} 张已打乱并入普通牌堆。`,'sys');
+  }
+}
+function refillNormal(){
+  trimDiscard();
+  if(G.normal.length===0 && G.discard.length>0){
+    G.normal = shuffle(G.discard.splice(0));
+    log('弃牌堆洗混，重置为普通牌堆。','sys');
+  }
+}
+function enterWarring(){
+  if(G.era==='spring'){
+    G.era='warring';
+    log('⚠️ 周天子牌堆被抽空——<b>时代更替，进入战国！</b> 取消掷骰与纳贡，摸牌改自普通牌堆。','gold');
+    notify('⚠️ 时代更替 · 进入战国',
+      `<b>周天子牌堆已被抽空，礼崩乐坏，天下进入战国时代。</b><br><br>
+       · 取消每轮太史掷骰与纳贡环节<br>
+       · 摸牌来源改为<b>普通牌堆</b><br>
+       · 称帝者可独占掷骰（效果仅其本人与其附庸享有）<br>
+       · 克己复礼、谋反等行动依战国规则结算`);
+    renderTop();
+  }
+}
+/* 取牌堆优先级：只要周天子牌堆有牌就从那里取；抽空则进入战国并改从普通牌堆取 */
+function takeDrawPile(){
+  trimDiscard();
+  if(G.tianzi.length>0) return G.tianzi;
+  if(G.era==='spring') enterWarring();
+  if(!G.normal.length) refillNormal();
+  return G.normal;
+}
+function drawCards(p,n,opt={}){
+  const got=[];
+  for(let i=0;i<n;i++){
+    const pile=takeDrawPile();
+    if(pile && pile.length) got.push(pile.pop());
+  }
+  p.hand.push(...got);
+  if(opt.watch!==false) spearWatch(p,got);   // 吴王夫差矛
+  return got;
+}
+/* 吴王夫差矛：其他玩家在自己的回合外从牌堆摸牌时，持有者可选择其中 1 人抢走 1 张牌。
+   不含：摸牌阶段、附庸摸牌、凭空生成、弃牌堆回收（这些调用点不触发或不经过此处）。 */
+function spearWatch(drawer,got){
+  if(typeof __HEADLESS!=='undefined' && __HEADLESS) return;
+  if(!G||!got||!got.length||G.over) return;
+  if(!drawer||!drawer.alive||G.curP===drawer||drawer.vassalOf!=null) return;
+  const owners=alive().filter(x=>x!==drawer&&hasRelic(x,'吴王夫差矛'));
+  if(!owners.length) return;
+  (async()=>{
+    let o=owners[0];
+    const info=`${esc(drawer.name)} 在你的回合外从牌堆摸了 ${got.length} 张牌。`;
+    if(owners.some(x=>x.human)){
+      const sel=await asActor(owners.find(x=>x.human),()=>uiPickPlayer('🗡 【吴王夫差矛】', info+' 是否发动抢夺？先选择由谁发动。',owners,{allowSkip:true,skipLabel:'✖ 放弃抢夺'}));
+      if(!sel) return; o=sel;
+    }else if(o.human){
+      const yes=await uiYesNo('🗡 【吴王夫差矛】', info+`是否抢走其中 1 张？`);
+      if(!yes) return;
+    }else if(Math.random()>0.55) return;
+    const pool=got.filter(c=>drawer.hand.indexOf(c)>=0);
+    if(!pool.length) return;
+    let c;
+    if(o.human){
+      const sel=await asActor(o,()=>uiPickCards('🗡 【吴王夫差矛】·抢夺','选择要从其手中抢走的 1 张牌',pool,
+        {min:1,max:1,allowSkip:true,skipLabel:'✖ 放弃抢夺'}));
+      if(!sel||!sel.length) return; c=sel[0];
+    }else c=[...pool].sort((a,b)=>resVal(b)-resVal(a))[0];
+    removeFromHand(drawer,c); o.hand.push(c);
+    log(`🗡 ${o.name} 依【吴王夫差矛】从 ${drawer.name} 手中抢走 1 张牌。`,'gold');
+    notify('🗡 【吴王夫差矛】', `<b>${esc(o.name)}</b> 抢走了 ${esc(drawer.name)} 刚摸到的 1 张牌（【${esc(c.name)}】）。`, {auto:!o.human});
+    render();
+  })().catch(()=>{});
+}
+function drawOne(){ // 取1张牌（不直接给任何人）
+  const pile=takeDrawPile();
+  return pile && pile.length ? pile.pop() : null;
+}
+function drawFromNormal(p,n){ // 强制从普通牌堆摸牌
+  const got=[];
+  for(let i=0;i<n;i++){
+    if(!G.normal.length) refillNormal();
+    if(!G.normal.length) break;
+    got.push(G.normal.pop());
+  }
+  p.hand.push(...got);
+  return got;
+}
+function drawOneNormal(){ if(!G.normal.length) refillNormal(); return G.normal.length?G.normal.pop():null; }
+function seatOrderFrom(p){ // 自 p 起的出牌顺序（存活者）
+  const arr=alive(); const i=arr.indexOf(p); if(i<0) return [...arr];
+  return arr.slice(i).concat(arr.slice(0,i));
+}
+
+/* ---------------- 玩家工具 ---------------- */
+const alive = ()=>G.players.filter(p=>p.alive);
+const others = p => alive().filter(x=>x!==p);
+const P = id => G.players.find(x=>x.id===id); // 按唯一 id 找玩家（座位可能被军争迂直交换）
+function lordOf(p){ // 直接宗主
+  const id=p.vassalOf; return id==null?null:P(id);
+}
+function isVassalOf(p,q){ // p 是否 q 的直接或间接附庸
+  let cur=p, guard=0;
+  while(cur.vassalOf!=null && guard++<20){
+    const l=P(cur.vassalOf);
+    if(l===q) return true; cur=l;
+  }
+  return false;
+}
+function hasDeploy(p,type,name){ const c=p.dep[type]; return c && (!name || c.name===name); }
+function depCard(p,type){ return p.dep[type]; }
+function handLimit(p){
+  const k=KING(p);
+  let v=10+(k.handPlus||0)-(k.handMinus||0)-(p.rebornPenalty||0);
+  if(k.handMinusBeforeEmperor && !p.emperor) v-=(k.handMinusBeforeEmperor||0);  // 秦【耕战】：称帝前手牌上限-2
+  return v;
+}
+function KING(p){ return KINGDOMS.find(k=>k.id===p.kingdom); }
+function countLimitCards(p){ // 计入手牌上限的张数
+  const k=KING(p), m=depCard(p,'minister');
+  return p.hand.filter(c=>{
+    if(k.coinFree && c.name==='布币') return false;
+    if(m && m.name==='管仲' && c.name==='布币') return false;
+    if(k.grainFree && c.name==='粮草') return false;
+    if(k.mgFree && (c.type==='臣'||c.type==='将')) return false;  // 卫：臣将不占手牌位
+    return true;
+  }).length;
+}
+function coinValue(p){ // 手牌中布币总值（礼器×2）
+  return p.hand.reduce((s,c)=>s+(c.name==='布币'?1:(c.type==='礼器'?2:0)),0);
+}
+function citiesOf(p){ return Math.max(0,p.cities); }
+
+/* ---------------- 礼器与特殊防护 ---------------- */
+function hasRelic(p,name){ return !!(p && p.dep && p.dep.relic && p.dep.relic.name===name); }
+function hasAnyRelic(p,name){ return hasRelic(p,name); }
+// 和氏璧：被强制交易/被取牌时拒绝（每局一次）
+async function relicRefuse(p, desc){
+  if(!p || !hasRelic(p,'和氏璧') || p.relicRefused) return false;
+  let use;
+  if(p.human) use=await asActor(p,()=>uiYesNo('【和氏璧】','他人正要从你手中取走牌：'+(desc||'')+'是否打出和氏璧拒绝这次取牌？（每局仅一次）'));
+  else use=Math.random()<0.5;
+  if(!use) return false;
+  p.relicRefused=true;
+  log(`💎 ${p.name} 打出【和氏璧】拒绝：${desc||''}`,'good');
+  notify('💎 【和氏璧】生效', `${p.name} 以和氏璧拒绝了这次取牌。<br><span style="color:var(--ink2)">${desc||''}</span>`, {auto:!p.human});
+  return true;
+}
+// 军形先胜：2层【先胜】护盾，可挡1次伤害、可令1张针对你的技能牌失效（一直有效，直到被消耗）
+function junxingCharges(p){ return (G && G.junxing && G.junxing.id===p.id) ? G.junxing.n : 0; }
+function junxingTake(p){ if(junxingCharges(p)>0){ G.junxing.n--; return true; } return false; }
+async function junxingBlockSkill(t, skillName){
+  if(!t || junxingCharges(t)<=0) return false;
+  junxingTake(t);
+  log(`🛡 ${t.name}【军形先胜】令【${skillName}】对其失效（剩余护盾 ${junxingCharges(t)}）。`,'good');
+  notify('🛡 【军形先胜】生效', `${t.name} 的【先胜】护盾挡下了技能牌【${skillName}】。<br>剩余护盾：${junxingCharges(t)} 层`, {auto:!t.human});
+  return true;
+}
+
+/* ---------------- 事件牌 · 桌面效果系统 ----------------
+   事件牌打出后立即生效，并停留在「桌面」：对每名玩家持续到其下个回合结束为止
+   （每人各享有一整个回合的效果窗口）；所有人的窗口都结束后，牌回到弃牌堆。 */
+function tableFx(name){ // 某事件当前是否在桌面生效
+  return G && G.table ? G.table.find(t=>t.name===name) : null;
+}
+function fxConsumed(t,id){ return t.consumed && t.consumed[id]; }
+function fxAllConsumed(t){ return alive().every(p=>fxConsumed(t,p.id)); }
+function fxConsume(t,p,quiet){
+  if(!t.consumed) t.consumed={}; t.consumed[p.id]=true;
+  if(!quiet) log(`桌面事件【${t.name}】：${p.name} 的生效窗口已结束（${alive().filter(x=>fxConsumed(t,x)).length}/${alive().length}）。`,'sys');
+}
+/* 回合结束时：凡在本回合开始之前就已打出的事件，对当前玩家视为生效完毕 */
+function tableEndOfTurn(p){
+  if(!G||!G.table) return;
+  G.table.forEach(t=>{ if((t.bornAt??0)<G.turnSeq && !fxConsumed(t,p.id)) fxConsume(t,p); });
+  cleanupTable();
+}
+function cleanupTable(){
+  if(!G||!G.table) return;
+  const done=G.table.filter(t=>fxAllConsumed(t));
+  done.forEach(t=>{
+    const i=G.table.indexOf(t); if(i>=0) G.table.splice(i,1);
+    G.discard.push(t.card);
+    log(`📌 桌面事件【${t.name}】全员生效完毕，牌回到弃牌堆。`,'sys');
+  });
+}
+/* 只有自己的回合才能主动出牌 */
+function myTurn(){ return !!(G && G.curP===G.me && !G.over); }
+
+/* ---------------- 日志 / 提示 ---------------- */
+function log(html,cls=''){
+  const box=$('logBox'); if(!box) return;
+  const d=document.createElement('div');
+  d.className=cls; d.innerHTML=decorateRefs(html); box.appendChild(d); box.scrollTop=box.scrollHeight;
+  if(NET.mode==='host') NET.broadcast({t:'log', html, cls});              // 联机：战报同步给加入者
+}
+function toast(msg){
+  const ap=actorP();
+  if(NET.mode==='host' && isRemote(ap)){ NET.sendTo(ap.netSeat,{t:'toast', msg:String(msg)}); return; }
+  const t=$('toast'); t.innerHTML=msg; t.style.display='block';
+  clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',2200);
+}
+
+/* ---------------- 弹窗系统（人类交互） ---------------- */
+function showModal(html){ $('modal').innerHTML=html; $('modalMask').style.display='flex'; }
+function closeModal(){ $('modalMask').style.display='none'; }
+
+function uiChoice(title,desc,options,{allowClose=false,closeLabel='✖ 关闭（不打出）',noQueue=false,autoSec=0,autoValue=null,autoLabel=''}={}){ // options:[{label,sub,value}] → Promise<value>
+  const rp=actorP();
+  if(NET.mode==='host' && isRemote(rp)){          // 联机：把选择发给该玩家自己的浏览器
+    const av=options.findIndex(o=>o.value===autoValue);
+    return netAsk(rp.netSeat,{kind:'choice', title, desc:desc||'',
+      options:options.map(o=>({label:String(o.label), sub:o.sub?String(o.sub):''})),
+      allowClose, closeLabel, autoSec:autoSec||0, autoValue:av, autoLabel:autoLabel||''})
+      .then(i=>(i==null||i<0)?null:options[i].value);
+  }
+  const task = done => {
+    let html=`<h3>${title}</h3><div class="mdesc">${decorateRefs(desc||'')}</div><div class="opts">`;
+    options.forEach((o,i)=>{ html+=`<button class="mopt" data-i="${i}"><b>${o.label}</b>${o.sub?`<small>${decorateRefs(o.sub)}</small>`:''}</button>`; });
+    html+=`</div>${allowClose?`<div class="mrow"><button id="mClose">${closeLabel}</button></div>`:''}
+      ${autoSec?`<div class="mrow"><span id="autoCd" style="font-size:12px;color:var(--ink2);align-self:center;margin-right:auto"></span></div>`:''}`;
+    showModal(html);
+    let fin=false;
+    const finish=v=>{ if(fin) return; fin=true; if(cd) clearInterval(cd); closeModal(); done(); res(v); };
+    let left=autoSec;
+    const cdT=$('autoCd');
+    const tick=()=>{ if(cdT) cdT.textContent=autoLabel?`${autoLabel}（${left} 秒后自动选择…）`:`${left} 秒后自动选择…`; };
+    const cd = autoSec? setInterval(()=>{ left--; tick(); if(left<=0) finish(autoValue); },1000) : null;
+    if(autoSec) tick();
+    $('modal').querySelectorAll('.mopt').forEach(b=>b.onclick=()=>finish(options[+b.dataset.i].value));
+    const cl=$('mClose'); if(cl) cl.onclick=()=>finish(null);
+  };
+  let res;
+  const p=new Promise(r=>res=r);
+  if(noQueue) task(()=>{}); else _qPush(task);
+  return p;
+}
+function uiYesNo(title,desc){
+  return uiChoice(title,desc,[{label:'✅ 是',value:true},{label:'❌ 否',value:false}]);
+}
+function uiPickCards(title,desc,cards,{min=1,max=1,filter=null,allowSkip=false,skipLabel='✖ 取消',okLabel='确 定'}={}){
+  const list=(cards||[]).filter(c=>!filter||filter(c));
+  const rp=actorP();
+  if(NET.mode==='host' && isRemote(rp)){          // 联机：把待选牌发给该玩家自己的浏览器
+    if(list.length<min) return Promise.resolve(null);
+    return netAsk(rp.netSeat,{kind:'cards', title, desc:desc||'', min, max, allowSkip, skipLabel, okLabel,
+      cards:list.map(c=>{ const d=cardDesc(c)||{}; return {uid:c.uid,name:c.name,type:c.type,sub:String(d.play||d.deploy||'')}; })})
+      .then(uids=> uids==null ? null : list.filter(c=>uids.indexOf(c.uid)>=0));
+  }
+  return new Promise(res=>{
+    if(list.length<min){ res(null); return; }   // 可选牌不足下限：直接取消，防止卡死
+    let sel=[];
+    _qPush(done=>{
+      const render=()=>{
+        let html=`<h3>${title}</h3><div class="mdesc">${decorateRefs(desc)}（已选 ${sel.length}/${max}${min>0?`，至少 ${min}`:''}）</div><div class="opts">`;
+        list.forEach((c,i)=>{
+          const d=cardDesc(c);
+          const sub = d.play || d.deploy || '';
+          html+=`<button class="mopt ${sel.includes(c)?'sel':''}" data-i="${i}"><b>[${c.type}] ${esc(c.name)}</b><small>${esc(sub)}</small></button>`;
+        });
+        html+=`</div><div class="mrow">
+          ${allowSkip?`<button id="mSkip">${skipLabel}</button>`:''}
+          <button id="mOk" class="ok" ${sel.length<min?'disabled':''}>${okLabel}</button></div>`;
+        showModal(html);
+        $('modal').querySelectorAll('.mopt').forEach(b=>b.onclick=()=>{
+          const c=list[+b.dataset.i];
+          if(sel.includes(c)) sel=sel.filter(x=>x!==c);
+          else if(max<=0) { sel=[c]; }
+          else if(sel.length<max) sel.push(c); else {sel.shift();sel.push(c);}
+          render();
+        });
+        const ok=$('mOk'); if(ok) ok.onclick=()=>{ if(max<=0){closeModal();done();res([]);return;} if(sel.length>=min){closeModal();done();res(sel);} };
+        const sk=$('mSkip'); if(sk) sk.onclick=()=>{closeModal();done();res(null);};
+      };
+      render();
+    });
+  });
+}
+function uiPickPlayer(title,desc,cands,{allowSkip=false,info=null,skipLabel='✖ 取消'}={}){
+  if(!cands||!cands.length) return Promise.resolve(null);
+  const rp=actorP();
+  if(NET.mode==='host' && isRemote(rp)){          // 联机：把候选玩家发给该玩家自己的浏览器
+    return netAsk(rp.netSeat,{kind:'player', title, desc:desc||'', allowSkip, skipLabel,
+      cands:cands.map(p=>({id:p.id, name:p.name, kingdom:p.kingdom, cities:p.cities, hand:p.hand.length,
+        vas:p.vassalOf!=null, emp:!!p.emperor, extra:info?String(info(p)):''}))})
+      .then(id=> id==null ? null : (cands.find(x=>x.id===id)||null));
+  }
+  return new Promise(res=>{
+    _qPush(done=>{
+      let html=`<h3>${title}</h3><div class="mdesc">${decorateRefs(desc)}</div><div class="opts">`;
+      cands.forEach((p,i)=>{ const extra=info?info(p):'';
+        html+=`<button class="mopt" data-i="${i}"><b>${esc(p.name)} · ${esc(p.kingdom)}国<small style="display:inline;color:var(--seal2)"> ${esc(p.kingdom)}国策·${esc(KING(p).policy)}</small></b><small>城池 ${p.cities} · 手牌 ${p.hand.length}${p.vassalOf!=null?' · 附庸':''}${p.emperor?' · 已称帝':''}${extra?' · '+esc(extra):''}</small></button>`;});
+      html+=`</div>${allowSkip?`<div class="mrow"><button id="mSkip">${skipLabel}</button></div>`:''}`;
+      showModal(html);
+      $('modal').querySelectorAll('.mopt').forEach(b=>b.onclick=()=>{closeModal();done();res(cands[+b.dataset.i]);});
+      const sk=$('mSkip'); if(sk) sk.onclick=()=>{closeModal();done();res(null);};
+    });
+  });
+}
+/* 可用于抵挡一次攻击的牌：1 张【盾】（楚国基础牌亦可）；齐国可用 2 张布币当 1 张盾 */
+function shieldChoice(p){
+  if(!p) return null;
+  const k=KING(p);
+  const c=p.hand.find(x=>x.name==='盾')||(k.allAsBasic?p.hand.find(x=>x.type==='基础'&&x.name!=='盾'):null);
+  if(c) return [c];
+  if(k.twoCoinShield){ const coins=p.hand.filter(x=>x.name==='布币'); if(coins.length>=2) return coins.slice(0,2); }
+  return null;
+}
+async function humanConfirmAttackDefense(me, atk){
+// 被攻击时的人类决策：返回 'shield' | 'none'（部署效果另行处理）
+  const cards=shieldChoice(me);
+  if(!cards) return 'none'; // 没有可用的盾，直接不防御，避免卡死
+  const isCoin=cards.length>1;
+  const options=[{label:'🛡 打出盾牌抵挡',
+      sub:isCoin?'消耗 2 张布币（齐国国策：2币可当1盾），抵消本次攻击':'消耗1张盾（或楚国基础牌），抵消本次攻击',value:'shield'},
+                 {label:'😑 不防御',sub:'将失去城池',value:'none'}];
+  // 自动防御：有盾时弹窗 5 秒后自动出盾
+  return await uiChoice('⚔ 遭受攻击！',`${atk.att.name} 对你发起进攻${atk.note?('（'+atk.note+'）'):''}`,options,
+      {autoSec:5, autoValue:'shield', autoLabel:'🛡 自动防御'})
+    .then(v=>{
+      if(v==='shield'&&shieldChoice(me)) return 'shield';
+      return 'none';
+    });
+}
+
+/* ---------------- 渲染 ---------------- */
+function renderTop(){
+  if(G) trimDiscard();
+  $('eraLab').textContent = G.era==='spring'?'春秋时代':'战国时代';
+  $('roundLab').textContent = `第 ${G.round} 轮`;
+  const ts=G.players[G.taishi];
+  $('taishiLab').textContent = G.era==='spring'?`太史：${ts.name}（掷骰代天子）`:(G.emperorId!=null?`天子：${P(G.emperorId).name}`:'');
+  $('diceLab').textContent = G.dice?`六艺【${['','礼','乐','射','御','书','数'][G.dice]}】${G.dice===5&&RF.rebelWindow?'（附庸可谋反）':''}`:'';
+  $('tzN').textContent=G.tianzi.length; $('noN').textContent=G.normal.length; $('diN').textContent=G.discard.length;
+  $('diceBig').textContent='骰：'+(G.dice?['','礼','乐','射','御','书','数'][G.dice]:'—');
+  // 桌面事件与瘟疫状态
+  const tl=$('tableLab');
+  if(tl){
+    const parts=[];
+    (G.table||[]).forEach(t=>{
+      const used=alive().filter(x=>fxConsumed(t,x)).length;
+      parts.push(`📌【${t.name}】生效中（${used}/${alive().length} 已结束）`);
+    });
+    if(G.plague){ const h=P(G.plague.holder); if(h&&h.alive) parts.push(`🦠 瘟疫：${h.name}`); }
+    tl.innerHTML=parts.map(s=>`<div>${s}</div>`).join('');   // 每个状态单独一行，自动换行
+  }
+}
+function depTag(c){ if(!c) return ''; const d=cardDesc(c);
+  const fx=esc([d.deploy,d.play].filter(Boolean).join('\n'));
+  return `<span class="tag dep ref" title="${fx}">${c.type==='臣'?'臣':'将'}·${esc(c.name)}</span>`; }
+function render(){
+  // 联机房主端：任何时刻都渲染房主自己的视角（即便此刻正在代打某个加入者的操作）
+  if(NET.mode==='host' && G && G.me && G.me.netSeat!=null && G.players[0]){
+    const om=G.me; G.me=G.players[0];
+    try{ renderSelf(); } finally { G.me=om; }
+    return;
+  }
+  renderSelf();
+}
+function renderSelf(){
+  renderTop();
+  const publicHands=!!tableFx('流言四起');
+  const opp=alive().filter(p=>p!==G.me);
+  $('oppRow').innerHTML=opp.map(p=>{
+    const isMyVas=G.me&&isVassalOf(p,G.me);
+    const handShow=publicHands
+      ? `<div style="font-size:11px;color:var(--ink2);margin-top:2px">手牌：${p.hand.length?esc(p.hand.map(c=>c.name).join('、')):'（无）'}</div>`
+      : '';
+    return `
+    <div class="pcard ${G.curP===p?'cur':''}">
+      <span class="nm">${esc(p.name)}</span> <span class="kd ref" title="${esc(`【${p.kingdom}国 · 国策：${KING(p).policy}】\n${KING(p).desc}`)}">${esc(p.kingdom)}国</span>
+      <span class="tag" style="border:none;background:transparent;color:var(--gold);padding:0">${esc(KING(p).policy)}</span>
+      ${p.emperor?'<span class="tag emp">帝</span>':''}
+      ${p.vassalOf!=null?`<span class="tag vas">附庸→${esc(P(p.vassalOf).name)}</span>`:''}
+      ${p.plague?'<span class="tag" style="background:#e6f4e0;border-color:#9fc98f;color:#2e6e2e">🦠 瘟疫</span>':''}
+      ${p.ruined?'<span class="tag" style="background:#eee;border-color:#bbb">🏚 流亡</span>':''}
+      <div>城池 <b>${p.cities}</b> · 手牌 <b>${p.hand.length}</b> · 布币 ${p.hand.filter(c=>c.name==='布币').length}${G.me&&p!==G.me?` · 距离 <b style="color:var(--seal)">${seatDistance(G.me,p)}</b>`:''}</div>
+      <div class="tags">${depTag(p.dep.minister)}${depTag(p.dep.general)}${p.dep.relic?`<span class="tag dep ref" title="${esc(RELICS[p.dep.relic.name]||'')}">礼器·${esc(p.dep.relic.name)}</span>`:''}</div>
+      ${handShow}
+      ${isMyVas?`<button class="abtn mini" style="margin-top:3px" onclick="showVassalHand(${p.id})">👁 查看手牌</button>`:''}
+    </div>`;}).join('');
+  const me=G.me, mk=KING(me);
+  $('meTop').innerHTML=`<span><b>${esc(me.name)}</b> · <b style="color:var(--seal2)">${esc(me.kingdom)}国</b>
+     <span class="tag" title="${esc(mk.desc)}">国策·${esc(mk.policy)}</span>
+     ${me.emperor?'<span class="tag emp">已称帝</span>':''}
+     ${me.vassalOf!=null?`<span class="tag vas">附庸→${esc(P(me.vassalOf).name)}</span>`:''}</span>
+     <span>城池 <b style="color:var(--seal);font-size:17px">${me.cities}</b> ｜ 手牌 ${me.hand.length}/${handLimit(me)} ｜ 布币 ${me.hand.filter(c=>c.name==='布币').length} ｜ 势力城池 ${me.cities+alive().filter(x=>isVassalOf(x,me)).reduce((s,x)=>s+x.cities,0)}</span>`;
+  const depFx = c => { if(!c) return ''; const d=cardDesc(c); return esc(d.deploy||d.play||''); };
+  const dskills=[me.dep.minister,me.dep.general].filter(c=>c&&depActiveSkill(c));
+  $('depRow').innerHTML = `<span class="lbl">已部署：</span>
+     ${depTag(me.dep.minister)||'<span class="tag">无文臣</span>'}
+     ${depTag(me.dep.general)||'<span class="tag">无武将</span>'}
+     ${me.dep.relic?`<span class="tag dep ref" title="${esc(RELICS[me.dep.relic.name]||'')}">礼器·${esc(me.dep.relic.name)}</span>`:'<span class="tag">无礼器</span>'}
+     ${dskills.length?`<span class="lbl">｜ 可发动技能：</span>`+dskills.map(c=>`<button class="abtn mini" onclick="actDeploySkill('${esc(c.name)}')">${depActiveSkill(c).actLabel}</button>`).join(''):''}
+     ${(me.dep.minister||me.dep.general||me.dep.relic)?`<div style="width:100%;font-size:11px;color:var(--ink2);line-height:1.6">
+        ${me.dep.minister?`<div>【${esc(me.dep.minister.name)}】${depFx(me.dep.minister)}</div>`:''}
+        ${me.dep.general?`<div>【${esc(me.dep.general.name)}】${depFx(me.dep.general)}</div>`:''}
+        ${me.dep.relic?`<div>【${esc(me.dep.relic.name)}】${esc(RELICS[me.dep.relic.name]||'')}</div>`:''}</div>`:''}`;
+  $('handRow').innerHTML=me.hand.map((c,i)=>{
+    const d=cardDesc(c); const fx=esc((d.deploy||'')+' '+(d.play||''));
+    return `<button class="hcard t${c.type}" data-i="${i}" title="${fx}"><b>${esc(c.name)}</b><small>${c.type}</small></button>`;}).join('')||'<span style="color:var(--ink2);font-size:13px">手牌已空</span>';
+  $('handRow').querySelectorAll('.hcard').forEach(b=>b.onclick=()=>cardMenu(me.hand[+b.dataset.i]));
+  renderActions();
+  if(NET.mode==='host') netPush();     // 联机：把最新局面（已隐藏他人手牌）推给加入者
+}
+/* 动作栏：房主端本地渲染 / 加入者端按房主下发的按钮清单渲染（点击回传房主执行） */
+function renderActions(){
+  const acts=$('meActions');
+  if(NET.mode==='guest'){
+    const list=G.actions||[];
+    acts.innerHTML = list.length
+      ? list.map(a=>`<button class="abtn${a.main?' main':''}"${a.disabled?' disabled':''}${a.title?` title="${esc(a.title)}"`:''} onclick="netAct('${a.key}')">${a.label}</button>`).join('')
+      : '<span style="font-size:13px;color:var(--ink2)">⏳ 等待其他诸侯行动……</span>';
+    $('buyRoadLab').textContent='';
+    return;
+  }
+  acts.innerHTML=buildActions().map(a=>`<button class="abtn${a.main?' main':''}"${a.disabled?' disabled':''}${a.title?` title="${esc(a.title)}"`:''} onclick="${a.key}()">${a.label}</button>`).join('');
+  $('buyRoadLab').textContent = TF && TF.buyRoad ? '（本次已买路：距离视为相邻）' : '';
+}
+/* 生成当前玩家（G.me）可用的动作清单；联机时房主会把它下发给对应的加入者 */
+function buildActions(){
+  const me=G.me, k=KING(me);
+  if(!TF) TF=newTurnFlags();   // 开局首次渲染时 TF 尚未初始化（修复宋/赵/卫等无法开局）
+  const canAtk = geCount(me)>0;
+  const coinN = me.hand.filter(c=>c.name==='布币').length;
+  const syBan = alive().some(x=>hasDeploy(x,'minister','商鞅'));
+  const freeEx = (k.freeExchange&&!TF.freeExUsed)||(hasRelic(me,'随侯珠')&&!TF.suihouUsed);
+  const A=[], add=(key,label,dis,title,main)=>A.push({key,label,disabled:!!dis,title:title||'',main:!!main});
+  add('actAttack','⚔ 攻击',!canAtk,'',true);
+  if(k.buyCity) add('actBuyCity','🏙 国策·4布币购城',TF.buyCityUsed||coinN<4);
+  if(k.buyDeployed) add('actBuyDeployed','🧲 国策·4布币买臣将',TF.buyDepUsed||coinN<4);
+  if(me.emperor&&hasRelic(me,'和氏璧')&&me.hand.some(c=>c.type==='礼器')) add('actForgeSeal','🏵 铸造传国玉玺',false);
+  add('actTrade','🤝 交易'+(syBan?'（禁）':''),syBan,syBan?'【垦草令】生效中：全场禁止交易':'');
+  add('actExchange','🪙 布币换牌'+(freeEx?'（含1次免费）':''),false);
+  add('actVassalAid','🏹 附庸助攻',me.vassalOf!=null);
+  add('actRebel','🔥 谋反',!canRebel(me));
+  add('actEmperor','👑 称帝',!(canEmperor(me)&&!me.emperor),emperorNeed(me));
+  add('actKeji','🙇 克己复礼',!(G.era==='warring'&&!me.emperor));
+  add('actAttackPile','🗡 攻击周天子',!(me.emperor&&G.era==='spring'));
+  add('actEnd','⏭ 结束出牌 → 纳贡',false,'',true);
+  return A;
+}
+
+/* ---------------- 资源支付 ---------------- */
+function cardsUsableAs(p,type){ // 手牌中可当作 type 使用的牌
+  const k=KING(p), m=depCard(p,'minister');
+  return p.hand.filter(c=>{
+    if(c.name===type) return true;
+    if(type==='粮草'&&c.name==='布币') return true;      // 布币可替代粮草
+    if(type==='布币'&&m&&m.name==='管仲') return true;   // 管仲：任意手牌当布币
+    if(type==='布币'&&c.type==='礼器') return true;      // 礼器=2布币（此处简化为可抵1次支付单位）
+    if(k.allAsBasic&&c.type==='基础'&&(type==='粮草'||type==='盾'||type==='戈')) return true; // 楚
+    if(k.allAsGe&&c.type==='基础'&&type==='戈') return true; // 秦
+    return false;
+  });
+}
+async function payResource(p,type,n,note='',{cancelable=true}={}){
+  // 返回实际支付的牌数组；取消返回 null；不足返回 []
+  const usable=cardsUsableAs(p,type);
+  if(usable.length<n) return [];
+  if(p.human){
+    const sel=await asActor(p,()=>uiPickCards(`支付 ${n} 张【${type}】`,note||'选择要支付的手牌',usable,
+      {min:n,max:n,allowSkip:cancelable,skipLabel:'✖ 取消支付'}));
+    if(!sel) return null;
+    sel.forEach(c=>removeFromHand(p,c)); G.discard.push(...sel);
+    return sel;
+  }else{
+    const sorted=[...usable].sort((a,b)=>resVal(a)-resVal(b)).slice(0,n);
+    sorted.forEach(c=>removeFromHand(p,c)); G.discard.push(...sorted);
+    return sorted;
+  }
+}
+function resVal(c){ return {'布币':1,'粮草':1,'盾':2,'戈':2,'技能':2,'礼器':5,'臣':4,'将':4}[c.type==='基础'?c.name:c.type]??1; }
+function removeFromHand(p,c){ const i=p.hand.findIndex(x=>x.uid===c.uid); if(i>=0)p.hand.splice(i,1); }
+function countResource(p,type){ return cardsUsableAs(p,type).length; }
+
+/* ---------------- 攻击距离与消耗 ---------------- */
+function seatDistance(a,b){ // 双向环距
+  const arr=alive(); const ia=arr.indexOf(a), ib=arr.indexOf(b);
+  const d=Math.abs(ia-ib); return Math.min(d,arr.length-d);
+}
+function calcCost(att,tgt,{dist=null,road=false}={}){
+  if(TF.bingjia===att.id) return 0;                        // 兵家至圣：免消耗、无视距离
+  const arr=alive();
+  let d = dist==null?seatDistance(att,tgt):dist;
+  if(road) d=1;
+  let cost=d;
+  if(G.dice===3) cost-=1; if(G.dice===4) cost+=1;         // 六艺 射/御
+  if(TF.attackCostMod) cost += (TF.costModBy==null||TF.costModBy===att.id)?TF.attackCostMod:0; // 减灶 / 九变杂于
+  const k=KING(att);
+  cost += (k.atkMod||0);
+  if(k.ba && att.cities<5) cost -= (5-att.cities);         // 巴国
+  const m=depCard(att,'general'); if(m&&m.name==='赵奢'&&d>=2) cost-=1;
+  if(hasRelic(att,'吴王阖闾剑') && !TF['heLv_'+att.id]) cost-=1;   // 吴王阖闾剑：本回合首次攻击粮草 -1
+  const dk=KING(tgt);
+  cost += (dk.defMod||0);
+  if(dk.lastCityGuard && tgt.cities===1) cost+=3;
+  if(TF.xushiTarget===tgt) cost-=2;                        // 虚实避实
+  if(TF.aidAttack) cost=0;                                 // 附庸助攻
+  // 事件牌效果
+  if(tableFx('灾年')) cost-=1;                             // 灾年：进攻消耗-1
+  if(G.plague && P(G.plague.holder)===tgt) cost-=1;        // 瘟疫：进攻染疫者少1粮
+  const zx=tableFx('尊王攘夷令');                          // 尊王攘夷令：攻城池最少者免粮草
+  if(zx){
+    const minC=Math.min(...alive().map(x=>x.cities));
+    if(tgt.cities===minC) cost=0;
+  }
+  return Math.max(0,cost);
+}
+// 附庸不得攻击宗主（谋反窗口/【礼崩乐坏】事件除外）
+function canAttackTarget(att,tgt){
+  if(!att||!tgt||att===tgt) return false;
+  if(att.ruined) return false;                 // 亡国流亡期间不能行动
+  if(isVassalOf(att,tgt)) return !!tableFx('礼崩乐坏');   // 仅【礼崩乐坏】生效期间可犯上
+  return true;
+}
+function middlePlayers(att,tgt){
+  // 环形路径上靠近方向的中间玩家（取较短路径）
+  const arr=alive(); const ia=arr.indexOf(att), ib=arr.indexOf(tgt);
+  const d=(ib-ia+arr.length)%arr.length, rd=arr.length-d;
+  const path = d<=rd ? arr.slice(ia+1,ib) : arr.slice(ib+1,ia).reverse();
+  return path;
+}
+
+/* ---------------- 攻击主流程 ---------------- */
+async function doAttack(att,tgt,{free=false,freeCost=false,road=null,note='',gainTo=null}={}){
+  // free：完全免费（不支付、不需戈）；freeCost：免支付但仍需打出戈；road：null=询问买路（距离≥2时）
+  // gainTo：本次攻击所夺城池的归属（默认攻击者；管仲【尊王攘夷】、苏秦【六国合纵】归发起者）
+  log(`⚔ <b>${att.name}</b> 向 <b>${tgt.name}</b> 发起进攻！`,'war');
+  if(!canAttackTarget(att,tgt)){
+    log(`🚫 ${att.name} 是 ${tgt.name} 的附庸，非谋反不得攻击宗主。`,'sys');
+    notify('🚫 附庸不得犯上', `${esc(att.name)} 是 ${esc(tgt.name)} 的附庸。<br>除谋反外，附庸不能攻击宗主。`, {auto:true});
+    return;
+  }
+  // 孙膑拦阻
+  const sb=depCard(tgt,'minister');
+  if(sb&&sb.name==='孙膑'&&att.hand.length>0){
+    let c=null;
+    if(att.human){
+      const sel=await asActor(att,()=>uiPickCards('【围魏救赵】',`${tgt.name} 部署了孙膑：你须赠予其 1 张手牌，否则本次攻击失败`,att.hand,
+        {min:1,max:1,allowSkip:true,skipLabel:'✖ 放弃攻击'}));
+      c=sel?sel[0]:null;
+      if(!c){ log(`${att.name} 放弃攻击（拒付孙膑【围魏救赵】的赠牌）。`,'sys'); return; }
+    }else c=[...att.hand].sort((a,b)=>resVal(a)-resVal(b))[0];
+    removeFromHand(att,c); tgt.hand.push(c);
+    log(`🎯 ${tgt.name} 孙膑【围魏救赵】：${att.name} 须赠予其 1 张手牌（【${c.name}】）。`,'good');
+    notify('🎯 围魏救赵', `${esc(att.name)} 打出【戈】攻击 ${esc(tgt.name)}，依孙膑【围魏救赵】须赠予其 <b>1 张手牌</b>。`, {auto:!att.human});
+  }
+  // 军形先胜（护盾结算见下方）
+  if(TF.dangran&&TF.dangran.includes(tgt.id)){ log(`${tgt.name} 受【当染慎交】保护，攻击无效。`,'good'); return; }
+  let geNum=null;   // 本次打出【戈】的张数＝基础伤害
+  if(!free){
+    let cost=calcCost(att,tgt);
+    if(!freeCost){
+      // ---- 买路 ----
+      if(road===null && seatDistance(att,tgt)>=2 && TF.bingjia!==att.id && !(depCard(att,'general')&&depCard(att,'general').name==='赵奢')){
+        const mids=middlePlayers(att,tgt);
+        let doRoad=false;
+        // 路过自己的附庸：无需过路费，直接借道
+        const ownVas=mids.find(m=>m.alive&&isVassalOf(m,att));
+        if(ownVas){
+          TF.buyRoad=true; doRoad=true;
+          log(`🛣 ${att.name} 的大军借道自己的附庸 <b>${ownVas.name}</b>，附庸不收过路费（本次距离视为相邻）。`,'good');
+        }
+        else if(hasRelic(att,'杜虎符')){
+          TF.buyRoad=true; doRoad=true;
+          log(`🪪 ${att.name} 依【杜虎符】：买路所需资源 -1，本次借道不花资源（距离视为相邻）。`,'good');
+        }
+        else if(att.human && mids.length){
+          const mid=await asActor(att,()=>uiPickPlayer('买路？（可选）',
+            `攻击 ${tgt.name} 距离 ${seatDistance(att,tgt)}，需消耗 ${cost} 张粮草/布币。可向中间玩家支付 1 张过路费借路，使本次攻击距离视为相邻。`,
+            mids,{allowSkip:true,skipLabel:'✖ 不买路，直接进攻'}));
+          if(mid){
+            const payT=await asActor(att,()=>uiChoice(`向 ${mid.name} 借路`,'支付 1 张资源作为过路费（礼器抵扣过路费仅等价 1 布币）。对方也可能拒绝。',[
+              {label:'🌾 支付 1 粮草',value:'粮草'},
+              {label:'🪙 支付 1 布币',value:'布币'}],{allowClose:true,closeLabel:'✖ 取消买路'}));
+            if(payT){
+              const ok=await askBorrowRoad(mid,att,payT);
+              if(ok){
+                const pay=await payResource(att,payT,1,`借路费 → ${mid.name}`,{cancelable:false});
+                if(pay&&pay.length){
+                  G.discard.splice(G.discard.length-pay.length,pay.length); mid.hand.push(...pay);
+                  TF.buyRoad=true; doRoad=true;
+                  log(`🛣 ${att.name} 向 ${mid.name} 支付 1${payT} 借路成功。`);
+                }
+              } else log(`${mid.name} 拒绝借路。`,'sys');
+            } else log(`${att.name} 放弃买路。`,'sys');
+          }
+        } else if(!att.human && mids.length){
+          const mid=pick(mids);
+          if(!mid.human && cost>=2 && countResource(att,'粮草')>cost && Math.random()<0.5){
+            if(await askBorrowRoad(mid,att,'粮草')){
+              const pay=await payResource(att,'粮草',1,'借路费',{cancelable:false});
+              if(pay&&pay.length){ mid.hand.push(...pay); TF.buyRoad=true; doRoad=true;
+                log(`🛣 ${att.name} 向 ${mid.name} 支付 1粮草借路。`,'sys'); }
+            }
+          }
+        }
+        if(doRoad) cost=calcCost(att,tgt,{road:true});
+      }
+      // ---- 支付消耗 ----
+      if(hasRelic(att,'吴王阖闾剑')&&!TF['heLv_'+att.id]){ TF['heLv_'+att.id]=true;
+        log(`🗡 ${att.name} 依【吴王阖闾剑】：本回合首次攻击，粮草消耗 -1。`,'good'); }
+      if(cost>0){
+        const t = await askPayType(att,cost,tgt);
+        if(t===null||t===undefined){ log(`${att.name} 放弃攻击（未支付消耗）。`,'sys'); return; }
+        const paid=await payResource(att,t.type,t.n,`攻击 ${tgt.name} 的消耗`);
+        if(!paid||paid.length<t.n){ log(`${att.name} 支付不足，攻击取消。`,'sys'); return; }
+      }
+    }
+    // ---- 打出戈（可一次打出多张：每多 1 张，本次伤害 +1；对方只需 1 张盾即可全部抵消） ----
+    // 燕国国策：每回合首次主动进攻需打出2张【戈】
+    let geN=1;
+    const yanFirst = !free && KING(att).firstAtk2Ge && !TF['yan2ge_'+att.id];
+    if(yanFirst){ geN=2;
+      log(`❄️ ${att.name}（燕国国策）：本回合首次主动进攻需打出 2 张【戈】。`,'sys'); }
+    const geCards=await chooseGeCard(att,geN,{maxAll:true});
+    if(!geCards||!geCards.length){ log(`${att.name} 没有${geN>1?`${geN} 张`:''}【戈】牌，攻击取消。`,'sys'); return; }
+    if(yanFirst) TF['yan2ge_'+att.id]=true;
+    geNum=geCards.length;
+    TF.gePlayed=(TF.gePlayed||0)+geNum;
+  }
+  TF.buyRoad=false;
+  // 赵括【纸上谈兵】：本回合打出的第 6 张及之后的【戈】无法被【盾】防住
+  const atkDep=depCard(att,'general');
+  const unblockable = !!(atkDep&&atkDep.name==='赵括'&&(TF.gePlayed||0)>=6);
+  if(unblockable) log(`📜 ${att.name} 赵括【纸上谈兵】：本回合第 ${TF.gePlayed} 张【戈】，无法被【盾】防住！`,'war');
+  await resolveStrike(att,tgt,note,{gainTo,dmgBase:geNum,unblockable});
+  if(G&&G.tutorial&&att.human){ G.tut.done.attack=true; tutAdvance(); }
+}
+async function askPayType(att,n,tgt){
+  if(att.human){
+    const canL=countResource(att,'粮草'), canB=countResource(att,'布币');
+    const opts=[];
+    if(canL>=n) opts.push({label:`🌾 支付 ${n} 张粮草`,sub:`现有 ${canL} 张`,value:{type:'粮草',n}});
+    if(canB>=n) opts.push({label:`🪙 支付 ${n} 张布币`,sub:`现有 ${canB} 张`,value:{type:'布币',n}});
+    if(!opts.length){ toast('粮草/布币不足，无法支付！'); return null; }
+    const v=await asActor(att,()=>uiChoice('支付攻击消耗',
+      `攻击 <b>${tgt.name}</b> 需 <b>${n}</b> 张（粮草或布币，布币可替代粮草；礼器抵扣过路费仅等价 1 布币）。`,
+      opts,{allowClose:true,closeLabel:'✖ 取消攻击'}));
+    return v;
+  }else{
+    if(countResource(att,'粮草')>=n) return {type:'粮草',n};
+    if(countResource(att,'布币')>=n) return {type:'布币',n};
+    return null;
+  }
+}
+async function chooseGeCard(p,minN=1,{maxAll=false}={}){
+  const ges=p.hand.filter(c=>c.name==='戈'||(KING(p).allAsGe&&c.type==='基础'));
+  if(ges.length<minN) return null;
+  const used=[];
+  if(p.human){
+    const max=maxAll?ges.length:minN;
+    const sel=await asActor(p,()=>uiPickCards('打出【戈】',
+      `本次攻击至少打出 ${minN} 张戈${maxAll?`，至多 ${max} 张`:''}。<b>每多打出 1 张戈，本次城池伤害 +1</b>；但对方只需打出 1 张【盾】即可把本次攻击全部抵消。（取消则不发动）`,
+      ges,{min:minN,max,allowSkip:true,skipLabel:'✖ 取消攻击'}));
+    if(!sel||sel.length<minN) return null;
+    used.push(...sel);
+  } else {
+    let k=minN;
+    if(maxAll&&ges.length>=4&&Math.random()<0.45) k=minN+1;   // AI 偶尔加码多打 1 张
+    used.push(...ges.slice(0,k));
+  }
+  used.forEach(c=>{removeFromHand(p,c); G.discard.push(c);});
+  return used;
+}
+async function askBorrowRoad(mid,att,payType){
+  if(mid.human) return await asActor(mid,()=>uiYesNo('借路请求',`${att.name} 请求借道攻击你的邻国，并支付你 1${payType}。是否同意？`));
+  return mid.hand.some(c=>c.name==='布币'||c.name==='粮草') && Math.random()<0.6;
+}
+
+/* ---------------- 命中结算 ---------------- */
+async function resolveStrike(att,tgt,note='',{gainTo=null,dmgBase=null,unblockable=false}={}){
+  const winner = gainTo||att;   // 城池与击杀归属
+  // 防御方决策链
+  let blocked=false;
+  const tdep=depCard(tgt,'general');
+  let useShield=false;
+  const xushiActive = TF.xushiTarget===tgt;   // 虚实避实：其盾失效
+  if(!blocked){
+    for(const v of alive()){
+      if(v===tgt||lordOf(v)!==tgt) continue;
+      const sc=v.hand.find(c=>c.name==='盾');
+      if(sc){
+        removeFromHand(v,sc); G.discard.push(sc); blocked=true;
+        log(`🛡 ${tgt.name} 的附庸 ${v.name} 护主心切，被强制打出【盾】为宗主挡下攻击！`,'good');
+        notify('🛡 附庸护主', `<b>${esc(v.name)}</b>（${esc(v.kingdom)}国，${esc(tgt.name)} 的附庸）被迫打出 1 张【盾】，<br>为宗主 <b>${esc(tgt.name)}</b> 抵挡了 ${esc(att.name)} 的进攻。`, {auto:true});
+        break;
+      }
+    }
+  }
+  if(!blocked && unblockable){
+    log(`🌀 本次攻击【无法被防御】，${tgt.name} 无法以【盾】或其他手段抵挡。`,'war');
+  }else if(!blocked){
+    if(xushiActive){
+      log(`🌀【虚实避实】压制了 ${tgt.name} 的【盾】，本次无法抵挡。`,'war');
+      useShield=false;
+    } else if(tgt.human){
+      useShield = await asActor(tgt,()=>humanConfirmAttackDefense(tgt,{att,tgt,note}))==='shield';
+    }else{
+      useShield = !!shieldChoice(tgt);
+    }
+    // 晏婴部署：弃1手牌无效化
+    const yy=depCard(tgt,'minister');
+    if(yy&&yy.name==='晏婴'&&tgt.hand.length>0&&!useShield){
+      let useYy;
+      if(tgt.human) useYy=await asActor(tgt,()=>uiYesNo('【折冲樽俎】','弃置1张手牌使本次攻击无效？'));
+      else useYy=tgt.hand.length>2;
+      if(useYy){ const c=await chooseAnyCard(tgt,'弃置1张手牌发动【折冲樽俎】'); if(c){blocked=true; log(`${tgt.name} 晏婴【折冲樽俎】：弃牌化解攻击。`,'good');} }
+    }
+    if(useShield&&!blocked){
+      const cards=shieldChoice(tgt);
+      if(!cards){ useShield=false; } // 兜底：没有可用盾牌则视为不防御
+      else{
+        cards.forEach(c=>{removeFromHand(tgt,c); G.discard.push(c);});
+        blocked=true;
+        log(`🛡 ${tgt.name} ${cards.length>1?'以 2 张布币当作【盾】（齐国国策）':`打出【${cards[0].name}】`}，抵消攻击。`,'good');
+      }
+    }
+    // 廉颇【负荆请罪】：给对方任意1张手牌代替出盾（每回合限一次）
+    if(!blocked && tdep&&tdep.name==='廉颇'&&!tgt.lianpoUsed&&tgt.hand.length>0){
+      let useLp;
+      if(tgt.human) useLp=await asActor(tgt,()=>uiYesNo('【负荆请罪】','给对方任意 1 张手牌代替出盾，化解本次攻击？（每回合限一次）'));
+      else useLp=tgt.hand.length>3;
+      if(useLp){
+        let c=null;
+        if(tgt.human){ const sel=await asActor(tgt,()=>uiPickCards('【负荆请罪】',`选择 1 张手牌交给 ${att.name}，本次攻击将被化解`,tgt.hand,{min:1,max:1,allowSkip:true,skipLabel:'✖ 改为硬抗'})); c=sel?sel[0]:null; }
+        else c=[...tgt.hand].sort((a,b)=>resVal(a)-resVal(b))[0];
+        if(c){ removeFromHand(tgt,c); att.hand.push(c); tgt.lianpoUsed=true; blocked=true;
+          log(`🧎 ${tgt.name} 廉颇【负荆请罪】：交出【${c.name}】给 ${att.name}，化解了本次攻击。`,'good'); }
+      }
+    }
+    // 附庸被攻击时，宗主可选是否出盾帮其防御
+    if(!blocked && tgt.vassalOf!=null){
+      const lord=P(tgt.vassalOf);
+      if(lord&&lord.alive&&lord!==att){
+        const sc=lord.hand.find(c=>c.name==='盾');
+        if(sc){
+          let help;
+          if(lord.human) help=await asActor(lord,()=>uiYesNo('🛡 宗主护附庸',`你的附庸 <b>${tgt.name}</b> 正遭受 ${att.name} 的进攻。是否打出 1 张【盾】为其挡下？`));
+          else help=tgt.cities<=3&&Math.random()<0.6;
+          if(help){
+            removeFromHand(lord,sc); G.discard.push(sc); blocked=true;
+            log(`🛡 宗主 ${lord.name} 打出【盾】为附庸 ${tgt.name} 挡下攻击！`,'good');
+            notify('🛡 宗主护附庸', `<b>${esc(lord.name)}</b>（${esc(tgt.name)} 的宗主）打出 1 张【盾】，<br>为附庸 <b>${esc(tgt.name)}</b> 挡下了 ${esc(att.name)} 的进攻。`, {auto:!lord.human});
+          }
+        }
+      }
+    }
+  }
+  // 虚实避实：盾已在决策阶段被压制
+  if(blocked){ // 乐毅不触发；王翦不触发
+    return false;
+  }
+  // 军形先胜：完全抵挡1次伤害（对「无法被防御」的攻击无效）
+  if(unblockable!=='all' && junxingCharges(tgt)>0){
+    junxingTake(tgt);
+    log(`🛡 ${tgt.name}【军形先胜】挡下本次全部伤害（剩余护盾 ${junxingCharges(tgt)}）。`,'good');
+    notify('🛡 【军形先胜】抵挡伤害', `${esc(tgt.name)} 的【先胜】护盾完全抵挡了 ${esc(att.name)} 造成的城池伤害。<br>剩余护盾：${junxingCharges(tgt)} 层`, {auto:!tgt.human});
+    return false;
+  }
+  // 伤害计算
+  const adeploy=depCard(att,'general');
+  let dmg = dmgBase==null?1:dmgBase;
+  if(TF.zuozhan===att.id) dmg += 1;                    // 作战速胜
+  if(TF.dmgPlusBy===att.id) dmg += (TF.dmgPlus||0);    // 九变杂于
+  if(adeploy&&adeploy.name==='孙武'&&TF.aidAttack) dmg=2;
+  // 每回合首次攻击伤害+1：赵国国策【胡服骑射】／曹刿【一鼓作气】
+  const firstFlags=[];
+  if(KING(att).firstGePlus && !TF['firstGe_'+att.id]) firstFlags.push('firstGe_'+att.id);
+  if(adeploy&&adeploy.name==='曹刿' && !TF['caogui_'+att.id]) firstFlags.push('caogui_'+att.id);
+  if(firstFlags.length){ dmg += firstFlags.length; firstFlags.forEach(f=>{TF[f]=true;});
+    log(`💪 ${att.name} 本回合首次攻击，伤害 +${firstFlags.length}。`,'gold'); }
+  // 巴国：只剩 1 城时出戈效果+1
+  if(KING(att).ba && att.cities===1) dmg += 1;
+  // 曹刿【辙乱旗靡】：目标手牌 ≥5 时本次伤害+1
+  if(TF.zheluan===att.id && tgt.hand.length>=5){ dmg += 1;
+    log(`🚩 ${att.name}【辙乱旗靡】：${tgt.name} 手牌 ${tgt.hand.length} 张，本次伤害 +1。`); }
+  // 王翦索贿
+  if(tdep&&tdep.name==='王翦'&&!TF['wj_'+tgt.id]){
+    TF['wj_'+tgt.id]=true;
+    let pay=1;
+    if(att.human) pay=await asActor(att,()=>uiYesNo('【请田自保】',`${tgt.name} 要求你支付1布币，否则伤害-1。同意？`));
+    else pay=att.hand.filter(c=>c.name==='布币').length>0&&Math.random()<0.5;
+    if(pay){ const c=att.hand.find(x=>x.name==='布币'); if(c){removeFromHand(att,c);G.discard.push(c);tgt.hand.push(c);log(`${att.name} 支付1布币给 ${tgt.name}（请田自保）。`);} }
+    else { dmg=Math.max(1,dmg-1); log(`${tgt.name}【请田自保】：伤害-1。`); }
+  }
+  // 结算城池转移
+  dmg=Math.min(dmg,tgt.cities);
+  tgt.cities-=dmg; winner.cities+=dmg;
+  log(`💥 ${tgt.name} 失去 ${dmg} 座城池，转归 ${winner.name}！（${tgt.cities} 城剩余）`,'war');
+    // 白起部署【拔城升爵】：每令敌方损失1城，从牌堆抽1张牌
+  if(adeploy&&adeploy.name==='白起'&&dmg>0){
+    const got=drawCards(att,dmg);
+    log(`🏅 ${att.name}【拔城升爵】：${tgt.name} 损失 ${dmg} 城，从牌堆抽 ${got.length} 张牌。`,'gold');
+  }
+  
+  // 乐毅部署【下齐七十城】：额外强制对方弃1张手牌
+  if(adeploy&&adeploy.name==='乐毅'&&dmg>0){
+    if(tgt.hand.length){ const c=tgt.hand[rnd(tgt.hand.length)]; removeFromHand(tgt,c); G.discard.push(c);
+      log(`🏯 ${tgt.name} 被【下齐七十城】强制弃置1张手牌（【${c.name}】）。`); }
+    else log(`🏯【下齐七十城】：${tgt.name} 无手牌，效果无效。`,'sys');
+  }
+  // 田单反击
+  const tgtdep2=depCard(tgt,'general');
+  if(tgtdep2&&tgtdep2.name==='田单'&&tgt.hand.some(c=>c.name==='粮草')&&att.cities>1){
+    let useTd;
+    if(tgt.human) useTd=await asActor(tgt,()=>uiYesNo('【火牛阵】','弃1张粮草，令攻击方转移1座城池给你？'));
+    else useTd=att.cities>3;
+    if(useTd){ const g=tgt.hand.find(c=>c.name==='粮草'); removeFromHand(tgt,g); G.discard.push(g);
+      att.cities--; tgt.cities++; log(`🔥 ${tgt.name} 田单【火牛阵】反击，${att.name} 的1座城池转归 ${tgt.name}！`,'war'); }
+  }
+  onCitiesChanged();
+  // 城池归零
+  if(tgt.cities<=0){ await handleDefeat(winner,tgt); }
+  // 越王勾践剑：被攻击结算完毕后，可从牌堆领取 1 张牌
+  if(tgt.alive && hasRelic(tgt,'越王勾践剑')){
+    const got=drawCards(tgt,1,{src:'越王勾践剑'});
+    if(got.length){ log(`🗡 ${tgt.name} 依【越王勾践剑】在承受攻击后从牌堆领取 ${got.length} 张牌。`,'good'); }
+  }
+  checkVictories();
+  return true;
+}
+async function giveRandomCards(from,to,n){
+  const given=[];
+  for(let i=0;i<n&&from.hand.length;i++){
+    const c=from.hand[rnd(from.hand.length)];
+    removeFromHand(from,c); to.hand.push(c); given.push(c);
+  }
+  return given;
+}
+async function chooseAnyCard(p,desc){
+  if(!p.hand.length) return null;
+  if(p.human){ const s=await asActor(p,()=>uiPickCards('弃牌',desc,p.hand,{min:1,max:1})); return s?s[0]:null; }
+  const sorted=[...p.hand].sort((a,b)=>resVal(a)-resVal(b));
+  return sorted[0];
+}
+function drawCoin(p){ const c=p.hand.find(x=>x.name==='布币'); // 从手中"获得"布币：直接从弃牌堆找一张布币还原，或凭空生成
+  let coin=G.discard.find(x=>x.name==='布币');
+  if(coin){ G.discard.splice(G.discard.indexOf(coin),1); p.hand.push(coin); }
+  else p.hand.push(makeCard('布币','基础'));
+  onGainCoin(p);
+  return coin;
+}
+function onGainCoin(p){
+  // 范蠡【三聚三散】已改为主动技能按钮（见 depActiveSkill / actSanjusan），不再自动触发
+  return;
+}
+async function handleDefeat(att,tgt){
+  // 中山国策【死而复社】：首次被灭国时最后的城池保留，2轮后复国（复国后手牌上限-2）
+  if(KING(tgt).reborn && !tgt.rebornUsed && tgt.cities<=0){
+    tgt.rebornUsed=true; tgt.ruined=true; tgt.rebornRound=G.round+2; tgt.cities=1;
+    log(`🏚 <b>${tgt.name} 首次被灭国！</b>最后的城池得以保留，王室流亡——<b>${G.round+2} 轮后复国</b>（复国后手牌上限-2）。`,'gold');
+    notify('🏚 中山 · 死而复社',
+      `<b>${esc(tgt.name)}</b> 首次被灭国，但依国策【死而复社】：<br>
+       · 最后的 <b>1 座城池</b>得以保留<br>
+       · 王室流亡 <b>2 轮</b>（期间无法行动、无法被收纳）<br>
+       · 第 ${G.round+2} 轮起<b>复国</b>，但手牌上限 <b>-2</b><br>
+       <span style="color:var(--ink2)">若复国前最后的城池再失守，则真正出局。</span>`);
+    render();
+    return;
+  }
+  // 攻击方二选一
+  let choice;
+  const opts=[
+    {label:'⚔ 击杀',sub:'其移出游戏，已部署的将/臣/礼器归你所有',value:'kill'},
+    {label:'🏛 收纳附庸',sub:'归还其1城+1手牌，其成为你的附庸（可用于宗法胜利）',value:'vassal'}];
+  if(att.human){ choice=await asActor(att,()=>uiChoice(`${tgt.name} 城池归零！`, '选择处置方式',opts)); }
+  else {
+    const myVassals=others(att).filter(x=>isVassalOf(x,att)).length;
+    choice = (myVassals>=2||Math.random()<0.45)?'vassal':'kill';
+  }
+  if(choice==='kill'){
+    tgt.alive=false; tgt.out=true;
+    if(tgt.dep.minister)att.hand.push(tgt.dep.minister);
+    if(tgt.dep.general)att.hand.push(tgt.dep.general);
+    if(tgt.dep.relic)att.hand.push(tgt.dep.relic);
+    G.discard.push(...tgt.hand.splice(0));
+    tgt.dep={minister:null,general:null,relic:null};
+    // 其附庸独立
+    alive().concat(G.players.filter(p=>p.out)).forEach(x=>{ if(x.vassalOf===tgt.id) x.vassalOf=null; });
+    log(`☠️ <b>${tgt.name} 被 ${att.name} 击杀，移出游戏！</b>`,'war');
+    notify('☠️ 诸侯陨落 · 诛杀', `<b>${esc(tgt.name)}</b> 城池尽失，被 <b>${esc(att.name)}</b> 诛杀，退出争霸。<br>
+      <span style="color:var(--ink2)">其已部署的臣/将/礼器与全部手牌归 ${esc(att.name)} 所有。</span>`, {auto:!att.human && !tgt.human});
+    if(depCard(att,'general')&&depCard(att,'general').name==='伍子胥'){
+      drawCards(att,3); drawCoin(att); drawCoin(att);
+      log(`${att.name} 伍子胥【掘墓鞭尸】：摸3张牌+2布币。`,'gold');
+    }
+  }else{
+    att.cities=Math.max(1,att.cities-1); tgt.cities=1;
+    tgt.vassalOf=att.id;
+    // 宗主收取全部手牌与部署，再归还1张手牌
+    G.discard.push(...(tgt.dep.minister?[tgt.dep.minister]:[]),...(tgt.dep.general?[tgt.dep.general]:[]),...(tgt.dep.relic?[tgt.dep.relic]:[]));
+    tgt.dep={minister:null,general:null,relic:null};
+    G.discard.push(...tgt.hand.splice(0));
+    const back=att.hand[rnd(att.hand.length)];
+    if(back){ removeFromHand(att,back); tgt.hand.push(back); }
+    log(`🏛 <b>${tgt.name} 成为 ${att.name} 的附庸！</b>`,'gold');
+    notify('🏛 收纳附庸', `<b>${esc(tgt.name)}</b> 城池归零，被 <b>${esc(att.name)}</b> 收纳为附庸。<br>
+      · 宗主归还其 1 城 + 1 张手牌<br>
+      · 宗主每回合收取其除 1 城外的全部城池<br>
+      · 其摸牌时，宗主取走 1 张<br>
+      · 除谋反外，附庸不得攻击宗主`, {auto:!att.human && !tgt.human});
+  }
+  render();
+  checkVictories();
+}
+function onCitiesChanged(){ render(); }
+
+/* ---------------- 部署牌的主动技能（需按钮发动，非被动） ---------------- */
+function depActiveSkill(c){
+  if(!c) return null;
+  const d = c.type==='臣'?MINISTERS[c.name]:(c.type==='将'?GENERALS[c.name]:null);
+  return (d&&d.act)?d:null;
+}
+window.actDeploySkill=async function(name){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  const c=[me.dep.minister,me.dep.general].find(x=>x&&x.name===name);
+  if(!c){ toast('该牌已不在你的场上'); render(); return; }
+  if(name==='苏秦') await actSunliangCigu(me);
+  else if(name==='张仪') await actLianheng(me);
+  else if(name==='范蠡') await actSanjusan(me);
+  else if(name==='孔子') await actKongzi(me);
+  render();
+};
+/* 范蠡【三聚三散】每回合限一次：赠予1名玩家3张手牌，你摸3张牌 */
+async function actSanjusan(p){
+  if(TF.sanjusanUsed){ toast('【三聚三散】每回合限一次'); return; }
+  if(!p.hand.length){ toast('你没有手牌可赠予'); return; }
+  const cands=others(p); if(!cands.length) return;
+  const maxN=Math.min(3,p.hand.length);
+  let give;
+  if(p.human){
+    const sel=await asActor(p,()=>uiPickCards('【三聚三散】',`选择要赠出的手牌（${p.hand.length>=3?'3':'1~'+maxN} 张），然后你摸3张牌（取消则不发动）`,
+      p.hand,{min:Math.min(3,maxN),max:maxN,allowSkip:true,skipLabel:'✖ 取消'}));
+    if(!sel||!sel.length) return;
+    give=sel;
+  }else give=[...p.hand].sort((a,b)=>resVal(b)-resVal(a)).slice(0,maxN);
+  const t=await asActor(p,()=>uiPickPlayer('【三聚三散】','将所选牌赠予该玩家，你摸3张牌',cands,{allowSkip:true,skipLabel:'✖ 取消'}));
+  if(!t) return;
+  TF.sanjusanUsed=true;
+  give.forEach(c=>{removeFromHand(p,c); t.hand.push(c);});
+  const got=drawCards(p,3);
+  log(`💰 ${p.name} 发动范蠡【三聚三散】：赠 ${t.name} ${give.length} 张手牌，自己摸 ${got.length} 张牌。`,'good');
+}
+/* 孔子【复礼宗风】自己在内所有人各纳贡1张至天子牌堆，并恢复1次掷骰（每回合一次） */
+async function actKongzi(p){
+  if(TF.kongziUsed){ toast('【复礼宗风】每回合限一次'); return; }
+  const ok=await asActor(p,()=>uiYesNo('【复礼宗风】','你在内所有玩家各纳贡1张牌至周天子牌堆，并恢复1次掷骰。发动？'));
+  if(!ok) return;
+  TF.kongziUsed=true;
+  for(const x of seatOrderFrom(p)){
+    if(!x.hand.length) continue;   // 无牌者跳过（修复无牌卡死）
+    let c=null;
+    if(x.human){ const sel=await asActor(x,()=>uiPickCards('【复礼宗风】·纳贡','选择1张牌放入周天子牌堆',x.hand,{min:1,max:1,allowSkip:true,skipLabel:'✖ 跳过'})); c=sel?sel[0]:null; }
+    if(!c && x.hand.length) c=[...x.hand].sort((a,b)=>resVal(a)-resVal(b))[0];
+    if(c){ removeFromHand(x,c); G.tianzi.unshift(c); }
+  }
+  log(`🙇 ${p.name} 发动孔子【复礼宗风】：全场各纳贡1张牌，并恢复1次掷骰。`,'gold');
+  notify('🙇 【复礼宗风】', `全体玩家各向周天子牌堆纳贡 1 张牌。<br>随后立即<b>恢复一次六艺掷骰</b>。`, {auto:true});
+  await rollLiuyi(alive(),'孔子·复礼宗风');
+}
+async function actSunliangCigu(p){
+  if(TF.xuanliangUsed){ toast('【悬梁刺股】每回合只能发动一次'); return; }
+  if(!p.hand.length){ toast('你没有手牌可弃置'); return; }
+  const max=Math.min(3,p.hand.length);
+  const sel=await asActor(p,()=>uiPickCards('【悬梁刺股】',`弃置至多 ${max} 张手牌，然后重摸等量牌（每回合限一次，取消则不发动）`,p.hand,
+    {min:1,max,allowSkip:true,skipLabel:'✖ 取消'}));
+  if(!sel||!sel.length) return;
+  TF.xuanliangUsed=true;
+  sel.forEach(x=>{removeFromHand(p,x);G.discard.push(x);});
+  const got=drawCards(p,sel.length);
+  log(`📚 ${p.name} 发动苏秦【悬梁刺股】：弃置 ${sel.length} 张，重摸 ${got.length} 张（本回合已用）。`,'good');
+}
+/* 张仪【连横夺相】出牌阶段限一次：指定1名玩家，将其已部署的臣或将拆回其手牌 */
+async function actLianheng(p){
+  if(TF.lianhengUsed){ toast('【连横夺相】出牌阶段限一次'); return; }
+  const cands=others(p).filter(x=>x.dep.minister||x.dep.general);
+  if(!cands.length){ toast('场上没有其他玩家部署了臣/将'); return; }
+  let t;
+  if(p.human){
+    t=await asActor(p,()=>uiPickPlayer('【连横夺相】','选择目标：其已部署的臣或将将被拆回其手牌',
+      cands,{allowSkip:true,skipLabel:'✖ 取消',
+      info:x=>[x.dep.minister?`臣·${x.dep.minister.name}`:'',x.dep.general?`将·${x.dep.general.name}`:''].filter(Boolean).join('／')}));
+    if(!t) return;
+  }else t=pick(cands);
+  if(await junxingBlockSkill(t,'连横夺相')){ TF.lianhengUsed=true; return; }
+  TF.lianhengUsed=true;
+  const moved=[];
+  ['minister','general'].forEach(s=>{ if(t.dep[s]){ moved.push(`${t.dep[s].type}【${t.dep[s].name}】`); t.hand.push(t.dep[s]); t.dep[s]=null; } });
+  log(`🗡 ${p.name} 发动张仪【连横夺相】：将 ${t.name} 的 ${moved.join('、')} 拆回其手牌。`,'war');
+  notify('🗡 连横夺相', `${esc(p.name)} 发动张仪【连横夺相】：<br>${esc(t.name)} 已部署的 ${moved.map(esc).join('、')} 被<b>拆回其手牌</b>。`, {auto:!p.human&&!t.human});
+}
+/* 廉颇【负荆请罪】为被动防御技（被攻击时可给对方1张手牌代替出盾），见 resolveStrike */
+
+/* ---------------- 部署 ---------------- */
+async function deployCard(p,c){
+  const slot=c.type==='臣'?'minister':c.type==='将'?'general':'relic';
+  const pk=KING(p);
+  // 秦国国策：无法装备礼器
+  if(pk.noRelic && c.type==='礼器'){
+    if(p.human) toast('【耕战】国策：秦国无法装备礼器！');
+    return false;
+  }
+  // 魏国国策：部署臣/将需弃置1张牌
+  if(pk.deployTax && (c.type==='臣'||c.type==='将')){
+    if(p.hand.length<=1){ if(p.human) toast('部署臣/将需弃置1张牌，但你没有多余的牌！'); return false; }
+    let tax=null;
+    if(p.human){
+      const sel=await asActor(p,()=>uiPickCards('【李悝变法】','部署臣/将需先弃置 1 张手牌',p.hand.filter(x=>x!==c),
+        {min:1,max:1,allowSkip:true,skipLabel:'✖ 取消部署'}));
+      if(!sel||!sel.length) return false;
+      tax=sel[0];
+    }else tax=[...p.hand].filter(x=>x!==c).sort((a,b)=>resVal(a)-resVal(b))[0];
+    if(tax){ removeFromHand(p,tax); G.discard.push(tax);
+      log(`📜 ${p.name}（李悝变法）：部署【${c.name}】前弃置了1张手牌。`,'sys'); }
+  }
+  // 商鞅【垦草令】：除商鞅拥有者外，其余玩家最多部署1张臣/将
+  const syOwner = alive().find(x=>hasDeploy(x,'minister','商鞅'));
+  if(syOwner && syOwner!==p && c.type!=='礼器'){
+    const cnt=[p.dep.minister,p.dep.general].filter(Boolean).length;
+    if(cnt>=1){ if(p.human) toast('【垦草令】生效：你最多只能部署1张臣/将！'); return false; }
+  }
+  if(p.dep[slot]){
+    let rep;
+    if(p.human) rep=await asActor(p,()=>uiYesNo('替换部署',`你已部署 ${p.dep[slot].name}，用 ${c.name} 替换？被替换的牌将弃置。`));
+    else rep=true;
+    if(!rep) return false;
+    G.discard.push(p.dep[slot]);
+  }
+  removeFromHand(p,c);
+  p.dep[slot]=c;
+  log(`📌 ${p.name} 部署了 ${c.type}【${c.name}】。`);
+  // 韩国国策【申子之术】：臣/将部署时可触发一次其打出效果
+  if(pk.deployPlay && (c.type==='臣'||c.type==='将')){
+    let trig;
+    if(p.human) trig=await asActor(p,()=>uiYesNo('【申子之术】',`刚部署了【${c.name}】：可立即触发一次其打出效果（打出效果：${cardDesc(c).play}）。触发吗？`));
+    else trig=Math.random()<0.5;
+    if(trig){ log(`⚜ ${p.name}（申子之术）：部署【${c.name}】时触发了一次打出效果。`,'gold');
+      await execMG(p,c); }
+  }
+  // 商鞅 deploy 场上效应：立刻执行收超
+  if(c.type==='臣'&&c.name==='商鞅') enforceShangyang();
+  // 秦公镈：你每次部署臣/将时摸 1 张牌
+  if(hasRelic(p,'秦公镈')&&(c.type==='臣'||c.type==='将')){
+    const got=drawCards(p,1);
+    if(got.length) log(`🔔 ${p.name} 依【秦公镈】在部署后摸 ${got.length} 张牌。`,'good');
+  }
+  if(G&&G.tutorial&&p.human) tutAdvance();
+  render();
+  return true;
+}
+function enforceShangyang(){
+  const syOwner = alive().find(x=>hasDeploy(x,'minister','商鞅'));
+  if(!syOwner) return;
+  alive().forEach(p=>{
+    if(p===syOwner) return;   // 商鞅拥有者不受限
+    const cnt=[p.dep.minister,p.dep.general].filter(Boolean).length;
+    if(cnt>1){
+      ['minister','general'].forEach(s=>{
+        if(p.dep[s]&&cnt>1){ G.discard.push(p.dep[s]); p.dep[s]=null; }
+      });
+      log(`【垦草令】${p.name} 超额部署被收回。`,'sys');
+    }
+  });
+}
+
+/* ---------------- 交易 ---------------- */
+function onTrade(){ alive().forEach(p=>{ if(hasDeploy(p,'minister','子产')&&p!==G.curP){ drawCards(p,1); log(`${p.name} 子产【通商有度】因交易摸1张牌。`,'sys'); } }); }
+async function actTrade(){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  if(KING(me).noTrade){ toast('【耕战】国策：秦国重农抑商，无法交易！'); return; }
+  if(alive().some(x=>hasDeploy(x,'minister','商鞅'))){ toast('【垦草令】生效中：全场禁止交易'); return; }
+  if(!me.hand.length){ toast('你没有手牌可交易'); return; }
+  const tgt=await uiPickPlayer('发起交易','选择交易对象（价格由双方协商）',others(me));
+  if(!tgt) return;
+  const give=await uiPickCards('你付出的牌','选择0~5张手牌作为筹码',me.hand,{min:0,max:5});
+  if(!give) return;
+  const want=await uiChoice('你想得到什么？',`向 ${tgt.name} 交易`,[
+    {label:'🎲 其1张随机手牌',value:{t:'randcard'}},
+    {label:'🎯 其1张指定类型手牌',value:{t:'typedcard'}},
+    {label:'📌 其已部署的臣/将/礼器',value:{t:'deployed'}},
+    {label:'🏙 其1座城池',value:{t:'city'}},
+  ]);
+  if(!want) return;
+  let giveVal=give.reduce((s,c)=>s+resVal(c),0);
+  let result=null;
+  if(want.t==='randcard'){ result = await tradeAccept(tgt,me,giveVal,3)?'randcard':null; }
+  else if(want.t==='typedcard'){
+    const ty=await uiChoice('想要的类型',['戈','盾','粮草','布币','技能','臣','将','礼器'].map(x=>({label:x,value:x})));
+    if(!ty) return;
+    if(tgt.hand.some(c=>cardType(c)===ty)){ result = await tradeAccept(tgt,me,giveVal,resVal({type:ty})+2)?('typed:'+ty):null; }
+    else { toast(`${tgt.name} 手中没有该类型牌`); return; }
+  }
+  else if(want.t==='deployed'){
+    const slots=['minister','general','relic'].filter(s=>tgt.dep[s]);
+    if(!slots.length){ toast('对方没有已部署的牌'); return; }
+    const s=slots[0]; const c=tgt.dep[s];
+    result = await tradeAccept(tgt,me,giveVal,9)?'dep:'+s:null;
+  }
+  else if(want.t==='city'){
+    result = await tradeAccept(tgt,me,giveVal,7+tgt.cities)?'city':null;
+  }
+  if(!result){
+    log(`🤝 ${me.name} 向 ${tgt.name} 的交易请求被拒绝。`,'sys');
+    return;
+  }
+  // 成交：我付出的牌进入对方手牌（此前误入弃牌堆，已修正）
+  give.forEach(c=>removeFromHand(me,c)); tgt.hand.push(...give);
+  if(result==='randcard'){ const c=tgt.hand[rnd(tgt.hand.length)]; removeFromHand(tgt,c); me.hand.push(c);
+    log(`🤝 成交！${me.name} 获得 ${tgt.name} 1张手牌。`,'good'); }
+  else if(result.startsWith('typed:')){ const ty=result.slice(6); const c=tgt.hand.find(x=>cardType(x)===ty); removeFromHand(tgt,c); me.hand.push(c);
+    log(`🤝 成交！${me.name} 获得 ${tgt.name} 的【${c.name}】。`,'good'); }
+  else if(result.startsWith('dep:')){ const s=result.slice(4); const c=tgt.dep[s]; tgt.dep[s]=null; me.dep[s]=c;
+    log(`🤝 成交！${me.name} 买得 ${tgt.name} 部署的【${c.name}】。`,'good'); }
+  else if(result==='city'){ tgt.cities--; me.cities++;
+    log(`🤝 成交！${me.name} 购得 ${tgt.name} 1座城池。`,'good'); }
+  onTrade(); render(); checkVictories();
+}
+function cardType(c){ return c.type==='基础'?c.name:c.type; }
+function aiAcceptTrade(p,myGet,need){ return myGet>=need; }
+/* 联机时：交易对象是其他真人，则把"是否接受"发到对方浏览器去问 */
+async function tradeAccept(p,from,myGet,need){
+  if(NET.mode==='host'&&isRemote(p)){
+    const ok=await asActor(p,()=>uiYesNo('🤝 交易请求',
+      `<b>${esc(from.name)}</b> 向你发起交易：他付出价值 <b>${myGet}</b> 的筹码，希望换走你价值约 <b>${need}</b> 的东西。<br>是否接受？`));
+    return !!ok;
+  }
+  return aiAcceptTrade(p,myGet,need);
+}
+
+/* ---------------- 布币换牌 ---------------- */
+async function actExchange(){
+  const me=G.me, k=KING(me);
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  const canK=k.freeExchange&&!TF.freeExUsed;
+  const canR=hasRelic(me,'随侯珠')&&!TF.suihouUsed;
+  if(canK||canR){
+    const opts=[];
+    if(canK) opts.push({label:`✅ 国策【${k.policy}】免费换牌`,sub:'直接摸 1 张牌，不消耗布币（每回合1次）',value:'free'});
+    if(canR) opts.push({label:'💎 【随侯珠】免费换牌',sub:'直接摸 1 张牌，不消耗布币（每回合1次）',value:'relic'});
+    opts.push({label:'🪙 用布币换牌',sub:'弃置 1 张布币换 1 张牌（不限次数）',value:'coin'});
+    const use=await uiChoice('🪙 换牌','免费换牌每回合各限 1 次；布币换牌不限次数。',opts,{allowClose:true,closeLabel:'✖ 关闭'});
+    if(use===null||use===undefined) return;
+    if(use==='free'){
+      TF.freeExUsed=true; drawCards(me,1);
+      log(`🪙 ${me.name} 依国策【${k.policy}】免费换牌 1 次（无需弃币）。`,'good');
+      if(G&&G.tutorial&&me.human){ G.tut.done.exchange=true; tutAdvance(); }
+      render(); return;
+    }
+    if(use==='relic'){
+      TF.suihouUsed=true; drawCards(me,1);
+      log(`💎 ${me.name} 依【随侯珠】免费换牌 1 次（无需弃币）。`,'good');
+      if(G&&G.tutorial&&me.human){ G.tut.done.exchange=true; tutAdvance(); }
+      render(); return;
+    }
+  }
+  const coin=me.hand.find(c=>c.name==='布币');
+  if(!coin){ toast('你没有布币'); return; }
+  removeFromHand(me,coin); G.discard.push(coin); drawCards(me,1);
+  log(`🪙 ${me.name} 弃置 1 布币，从普通牌堆换得 1 张牌。`);
+  if(G&&G.tutorial&&me.human){ G.tut.done.exchange=true; tutAdvance(); }
+  render();
+}
+/* 国策：宋—4布币强制购城 / 卫—4布币强购他人已部署的臣将 */
+window.actBuyCity=async function(){
+  const me=G.me, k=KING(me);
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  if(!k.buyCity) return;
+  if(TF.buyCityUsed){ toast('本回合已使用过强制购城'); return; }
+  if(me.hand.filter(c=>c.name==='布币').length<4){ toast('需要 4 张布币'); return; }
+  const t=await uiPickPlayer('【国策·殷商遗风】','以 4 布币强制购买其 1 座城池',others(me),{allowSkip:true,
+    info:p=>`城池 ${p.cities}`});
+  if(!t) return;
+  for(let i=0;i<4;i++){ const c2=me.hand.find(x=>x.name==='布币'); if(c2){removeFromHand(me,c2);G.discard.push(c2);} }
+  TF.buyCityUsed=true;
+  t.cities--; me.cities++;
+  log(`💰 ${me.name} 以 4 布币强制购得 ${t.name} 的 1 座城池！`,'gold');
+  onCitiesChanged(); if(t.cities<=0) await handleDefeat(me,t);
+  render(); checkVictories();
+};
+window.actBuyDeployed=async function(){
+  const me=G.me, k=KING(me);
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  if(!k.buyDeployed) return;
+  if(TF.buyDepUsed){ toast('本回合已使用过强购臣将'); return; }
+  if(me.hand.filter(c=>c.name==='布币').length<4){ toast('需要 4 张布币'); return; }
+  const cands=others(me).filter(p=>p.dep.minister||p.dep.general);
+  if(!cands.length){ toast('场上没有可购买的已部署臣/将'); return; }
+  const t=await uiPickPlayer('【国策·货赂公行】','以 4 布币强制购买其已部署的臣或将',cands,{allowSkip:true,
+    info:p=>[p.dep.minister?`臣·${p.dep.minister.name}`:'',p.dep.general?`将·${p.dep.general.name}`:''].filter(Boolean).join('／')});
+  if(!t) return;
+  const slot=t.dep.minister?'minister':'general';
+  const dc=t.dep[slot];
+  const sel=await uiChoice(`购买 ${t.name} 的【${dc.name}】`,'选择 4 布币支付方式',[
+    {label:'✅ 支付 4 布币，收入你的场上',value:'ok'},{label:'✖ 取消',value:null}]);
+  if(sel!=='ok') return;
+  for(let i=0;i<4;i++){ const c2=me.hand.find(x=>x.name==='布币'); if(c2){removeFromHand(me,c2);G.discard.push(c2);} }
+  TF.buyDepUsed=true;
+  t.dep[slot]=null;
+  if(me.dep[slot]) G.discard.push(me.dep[slot]);
+  me.dep[slot]=dc;
+  log(`🧲 ${me.name} 以 4 布币购得 ${t.name} 部署的【${dc.name}】！`,'gold');
+  enforceShangyang(); render();
+};
+/* 国策：赵（胡服骑射）/ 巴（巴师勇锐）— 追加一次攻击 */
+window.actSecondAttack=async function(){
+  const me=G.me, k=KING(me);
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  if(TF.secondAtkUsed){ toast('本回合已使用过追加攻击'); return; }
+  const tgt=await uiPickPlayer('国策·追加攻击','选择追加攻击的目标',others(me),{allowSkip:true,
+    info:x=>`距离 ${seatDistance(me,x)} · 预计消耗 ${calcCost(me,x)}`});
+  if(!tgt) return;
+  TF.secondAtkUsed=true;
+  log(`🏹 ${me.name} 依国策【${k.policy}】追加一次攻击。`,'war');
+  await doAttack(me,tgt);
+  render();
+};
+
+/* ---------------- 六艺 ---------------- */
+const LIUYI={1:'礼',2:'乐',3:'射',4:'御',5:'书',6:'数'};
+async function rollLiuyi(targets,label){
+  const list=(targets||[]).filter(p=>p&&p.alive);
+  let n=1+rnd(6); const first=n;
+  const reBy=null;
+  if(n===5){ const n2=1+rnd(6); log(`🎲 掷出 5【书】——立即重掷：${n2}【${LIUYI[n2]}】`,'gold'); n=n2; }
+  else log(`🎲 ${label}掷出 <b>${n}【${LIUYI[n]}】</b>`,'gold');
+  await applyLiuyi(n,targets,{label, first, reBy});
+  return n;
+}
+async function applyLiuyi(n,targets,meta={}){
+  G.dice=n; RF.rebelWindow=false;
+  const arr=(targets||[]).filter(p=>p.alive);
+  const lines=[];
+  if(!arr.length){ render(); return; }
+  if(n===1){ // 礼
+    const sorted=[...arr].sort((a,b)=>b.cities-a.cities);
+    const hi=sorted[0], lo=sorted[sorted.length-1];
+    if(hi.cities>lo.cities){ hi.cities--; lo.cities++;
+      log(`【礼】城池最多者 ${hi.name} 转移1城给 ${lo.name}。`);
+      lines.push(`城池最多的 <b>${esc(hi.name)}</b> 转移 1 城给城池最少的 <b>${esc(lo.name)}</b>`); }
+    else{
+      const sh=[...arr].sort((a,b)=>b.hand.length-a.hand.length);
+      if(sh[0].hand.length>sh[sh.length-1].hand.length){
+        const c=sh[0].hand[rnd(sh[0].hand.length)]; removeFromHand(sh[0],c); sh[sh.length-1].hand.push(c);
+        log(`【礼】城池相等：手牌最多者赠予最少者1张牌。`);
+        lines.push(`城池相等：手牌最多的 <b>${esc(sh[0].name)}</b> 赠 1 张牌给 <b>${esc(sh[sh.length-1].name)}</b>`);
+      }else{ log(`【礼】全员平等，视为掷出6点。`);
+        lines.push('全员完全平等——<b>视为掷出 6 点【数】</b>');
+        await applyLiuyi(6,targets,Object.assign({},meta,{silent:true})); return; }
+    }
+  }
+  if(n===2){ RF.tributeExtra=1; log('【乐】本回合所有玩家额外纳贡1张牌。'); lines.push('本回合所有玩家<b>额外纳贡 1 张</b>牌至周天子牌堆'); }
+  if(n===3){ log('【射】本回合所有玩家攻击消耗-1。'); lines.push('本回合所有玩家<b>攻击消耗 -1</b>'); }
+  if(n===4){ log('【御】本回合所有玩家攻击消耗+1。'); lines.push('本回合所有玩家<b>攻击消耗 +1</b>'); }
+  if(n===5){ RF.rebelWindow=true; log('【书】附庸玩家本回合拥有谋反机会。'); lines.push('附庸玩家本回合<b>获得谋反机会</b>'); }
+  if(n===6){ RF.drawExtra=1; log('【数】本回合所有玩家摸牌阶段多摸1张。'); lines.push('本回合所有玩家<b>摸牌阶段多摸 1 张</b>'); }
+  if(!meta.silent){
+    notify(`🎲 君子六艺 · ${LIUYI[n]}`,
+      `<b>${esc(meta.label||'')}掷出 ${meta.first?`${meta.first} → `:''}<span style="color:var(--seal);font-size:20px">${n}【${LIUYI[n]}】</span></b>`
+      +(meta.reBy?`<br><span style="color:var(--ink2)">${esc(meta.reBy.name)} 重掷</span>`:'')
+      +`<br><br>${lines.join('<br>')||'（无额外效果）'}`
+      +`<br><br><span style="color:var(--ink2);font-size:12px">生效范围：${arr.map(x=>esc(x.name)).join('、')}</span>`,
+      {auto: !arr.some(x=>x.human)});
+  }
+  render();
+}
+
+/* ---------------- 附庸机制 ---------------- */
+function canRebel(p){
+  if(p.vassalOf==null||p.cities<=2) return false;
+  const k=KING(p);
+  if(k.freeRebel) return true;
+  const lord=lordOf(p);
+  if(lord&&KING(lord).freeRebel) return true;   // 晋：其附庸可随时谋反
+  if(G.era==='spring') return G.dice===5||RF.rebelWindow;
+  if(G.era==='warring') return true; // 需纳贡，交互中处理
+  return false;
+}
+async function actRebel(){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  if(me.vassalOf==null) return;
+  if(G.era==='warring'&&!(KING(me).freeRebel)){
+    const n=alive().filter(p=>p.vassalOf==null).length;
+    const sel=await uiPickCards('谋反纳贡',`战国谋反：向周天子纳贡 ${n} 张牌，然后掷骰，掷出5点方可成功`,me.hand,{min:n,max:n});
+    if(!sel) return;
+    sel.forEach(c=>{removeFromHand(me,c); G.tianzi.unshift(c);});
+    const r=1+rnd(6);
+    log(`🔥 ${me.name} 谋反掷骰：<b>${r}</b>`,'war');
+    notify('🔥 谋反掷骰', `<b>${esc(me.name)}</b> 纳贡 ${n} 张牌后掷出 <span style="color:var(--seal);font-size:20px">${r}</span><br>`
+      +(r===5?'<b style="color:var(--jade)">谋反成功！</b>':'<b style="color:var(--ink2)">未掷出 5 点，谋反失败。</b>'), {auto:!me.human});
+    if(r!==5){ log(`谋反失败！${me.name} 损失了纳贡的牌。`,'war'); render(); return; }
+  }
+  const lord=P(me.vassalOf);
+  me.vassalOf=null;
+  const halfC=Math.ceil(me.cities/2), halfH=Math.ceil(me.hand.length/2);
+  for(let i=0;i<halfC;i++){ me.cities--; lord.cities++; }
+  for(let i=0;i<halfH;i++){ const c=me.hand[rnd(me.hand.length)]; if(c){removeFromHand(me,c); lord.hand.push(c);} }
+  log(`🔥 <b>${me.name} 谋反成功，恢复独立！</b> 城池/手牌的一半转移给原宗主 ${lord.name}。`,'war');
+  render(); checkVictories();
+}
+async function actVassalAid(){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  const vas=others(me).filter(p=>isVassalOf(p,me)&&p.alive);
+  if(!vas.length){ toast('你没有附庸'); return; }
+  const hasGe = p => p.hand.some(c=>c.name==='戈'||(KING(p).allAsGe&&c.type==='基础'));
+  const withGe=vas.filter(hasGe);
+  if(!withGe.length){ toast('你的附庸手中都没有【戈】牌，无法助攻'); return; }
+  const targets=others(me).filter(p=>withGe.some(v=>canAttackTarget(v,p)));
+  if(!targets.length){ toast('无合法攻击目标（附庸不得攻击宗主）'); return; }
+  const v=await uiPickPlayer('附庸助攻','选择替你进攻的附庸（无视距离、免粮草，但须由附庸打出1张【戈】）',
+    withGe,{allowSkip:true,info:p=>`可打出【戈】${p.hand.filter(c=>c.name==='戈'||(KING(p).allAsGe&&c.type==='基础')).length} 张`});
+  if(!v) return;
+  const tgt=await uiPickPlayer('选择攻击目标','附庸将替你进攻该玩家（城池归你）',targets.filter(p=>p!==v&&canAttackTarget(v,p)),{allowSkip:true});
+  if(!tgt) return;
+  TF.aidAttack=true;
+  log(`🏹 ${v.name} 奉 ${me.name} 之命助攻 ${tgt.name}（无视距离、免粮草，由 ${v.name} 打出【戈】）。`,'war');
+  await doAttack(v,tgt,{freeCost:true,road:false,gainTo:me});
+  TF.aidAttack=false;
+  render();
+}
+
+/* ---------------- 称帝 / 克己复礼 / 攻击周天子 ---------------- */
+function canEmperor(p){
+  const total=alive().reduce((s,x)=>s+x.cities,0)+alive().filter(x=>isVassalOf(x,p)).reduce((s,x)=>s+x.cities,0);
+  const myPower=p.cities+alive().filter(x=>isVassalOf(x,p)).reduce((s,x)=>s+x.cities,0);
+  const mult=hasRelic(p,'九鼎')?4:2;   // 九鼎：称帝条件减半
+  return myPower*mult>=total;
+}
+function emperorNeed(p){ // 称帝悬停提示：还差什么
+  if(!G) return '';
+  const total=alive().reduce((s,x)=>s+x.cities,0);
+  const myPower=p.cities+alive().filter(x=>isVassalOf(x,p)).reduce((s,x)=>s+x.cities,0);
+  const mult=hasRelic(p,'九鼎')?4:2;
+  const need=Math.ceil(total/mult);
+  return `称帝条件：势力城池（含附庸）×${mult} ≥ 全场总城池。全场总城池 ${total}，需要势力城池 ${need}；当前 ${myPower}，还差 ${Math.max(0,need-myPower)} 座城池${hasRelic(p,'九鼎')?'（【九鼎】已使条件减半）':''}`;
+}
+async function actEmperor(){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  me.emperor=true; G.emperorId=me.id;
+  log(`👑 <b>${me.name} 宣告称帝！</b>`, 'gold');
+  if(G.era==='spring') log('春秋称帝者可无消耗攻击周天子牌堆（连续两次成功可摸1张）。');
+  notify('👑 称帝', `<b>${esc(me.name)}</b> 宣告称帝！<br>
+    ${G.era==='spring'?'春秋时代：可无消耗攻击周天子牌堆。':'战国时代：独占每轮掷骰权，效果由你与你的附庸共享。'}`
+    +(hasRelic(me,'九鼎')?'<br>💎 依【九鼎】，称帝条件减半。':''), {auto:!me.human});
+  render();
+}
+async function actKeji(){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  let n=alive().filter(p=>p.vassalOf==null).length;
+  n-= (KING(me).kejiMinus||0);
+  n=Math.max(1,n);
+  {
+    const sel=await uiPickCards('克己复礼',
+      `向周天子纳贡 ${n} 张牌（进入天子牌堆，日后可被他人抽取），并额外触发一次君子六艺掷骰（该效果持续到各自下个回合结束）`,
+      me.hand,{min:n,max:n,allowSkip:true,skipLabel:'✖ 取消'});
+    if(!sel) return;
+    sel.forEach(c=>{removeFromHand(me,c); G.tianzi.unshift(c);});
+    log(`🙇 ${me.name} 克己复礼，纳贡 ${n} 张牌至<b>周天子牌堆</b>。`,'gold');
+  }
+  let first=1+rnd(6), d=first;
+  if(d===5) d=1+rnd(6);
+  G.pendingLiuyi=d;
+  log(`🎲 克己复礼掷出${first===5?` 5【书】——立即重掷：<b>${d}【${LIUYI[d]}】</b>`:` <b>${first}【${LIUYI[first]}】</b>`}，该六艺效果将于<b>下一轮开始</b>时生效。`,'gold');
+  notify('🙇 克己复礼 · 掷骰', `<b>${esc(me.name)}</b> 纳贡 ${n} 张牌至周天子牌堆。<br>
+    掷出 <span style="color:var(--seal);font-size:20px">${first===5?`5 → ${d}`:first}【${LIUYI[d]}】</span><br>
+    <span style="color:var(--ink2)">该六艺效果将于 <b>下一轮开始</b> 时生效，并持续到各自下个回合结束。</span>`, {auto:!me.human});
+  render();
+}
+async function actAttackPile(){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  if(!me.emperor||G.era!=='spring') return;
+  const ge=await chooseGeCard(me);
+  if(!ge){ toast('需要一张戈牌'); return; }
+  // 他人护卫
+  let guarded=false;
+  for(const o of others(me)){
+    const s=o.hand.find(c=>c.name==='盾'||(KING(o).allAsBasic&&c.type==='基础'));
+    if(s){
+      let use;
+      if(o.human) use=await asActor(o,()=>uiYesNo('护卫周天子','称帝者攻击周天子！打出1张盾护卫，可从天子牌堆领取1张牌。护卫吗？'));
+      else use=Math.random()<0.4;
+      if(use){ removeFromHand(o,s); G.discard.push(s); drawCards(o,1);
+        log(`🛡 ${o.name} 护卫周天子，攻击被挡下，并从天子牌堆领1张牌。`,'good'); guarded=true; break; }
+    }
+  }
+  if(!guarded){
+    if(G.tianzi.length) G.tianzi.pop();
+    G.pileHits=(G.pileHits||0)+1;
+    log(`🗡 ${me.name} 攻击周天子成功！天子牌堆弃置1张牌（累计 ${G.pileHits}）。`,'war');
+    if(G.pileHits>=2){ G.pileHits=0; drawCards(me,1); log(`${me.name} 连续攻击周天子两次，从天子牌堆摸1张牌！`,'gold'); }
+    if(G.tianzi.length===0) enterWarring();
+  }
+  render();
+}
+
+/* ---------------- 铸造传国玉玺 ---------------- */
+window.actForgeSeal=async function(){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  if(!me.emperor){ toast('只有称帝者才可以铸造传国玉玺'); return; }
+  if(!hasRelic(me,'和氏璧')){ toast('需先部署【和氏璧】'); return; }
+  const relics=me.hand.filter(c=>c.type==='礼器');
+  if(!relics.length){ toast('还需在手牌中拥有另一件礼器'); return; }
+  let mate=null;
+  if(me.human){
+    const sel=await uiPickCards('🏵 铸造传国玉玺',
+      '选择与【和氏璧】一同铸造的礼器——铸造完成后，两张原牌将被<b>彻底摧毁、永不再回任何牌堆</b>',
+      relics,{min:1,max:1,allowSkip:true,skipLabel:'✖ 取消铸造'});
+    if(!sel||!sel.length) return; mate=sel[0];
+  } else mate=relics[0];
+  const he=me.dep.relic;
+  removeFromHand(me,mate);
+  me.dep.relic=null;                 // 和氏璧被摧毁（不进入弃牌堆/牌堆）
+  me.dep.relic=makeCard('传国玉玺','礼器');
+  log(`🏵 <b>${me.name} 铸成传国玉玺！</b>【和氏璧】与【${mate.name}】被彻底摧毁，永不再回牌堆。`,'gold');
+  notify('🏵 传国玉玺', `${esc(me.name)} 以【和氏璧】与【${esc(mate.name)}】铸成 <b>传国玉玺</b>！<br>
+    · 两张原牌被<b>彻底摧毁</b>，不再回到任何牌堆<br>
+    · 持有者每轮摸牌阶段<b>多摸 1 张牌</b>`, {auto:!me.human});
+  render();
+};
+
+/* ---------------- 卡牌打出菜单 ---------------- */
+async function cardMenu(c){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能主动出牌（现在只能被动响应）'); return; }
+  const d=cardDesc(c);
+  const isMG=(c.type==='臣'||c.type==='将');
+  const opts=[];
+  if(isMG){
+    opts.push({label:'📌 部署上场',sub:d.deploy,value:'deploy'});
+    opts.push({label:'⚡ 打出（一次性效果）',sub:d.play,value:'play'});
+    if(c.name!=='赵括') opts.push({label:'🎁 赠与（放进交易筹码）',sub:'通过「🤝 交易」把这张牌给其他玩家',value:'trade'});
+  }
+  if(c.type==='技能') opts.push({label:'⚡ 打出技能',sub:d.play,value:'skill'});
+  if(c.type==='事件') opts.push({label:'⚡ 打出事件',sub:d.play,value:'event'});
+  if(c.type==='礼器') opts.push({label:'📌 部署上场（价值2布币）',sub:d.deploy,value:'deploy'});
+  if(c.type==='基础') opts.push({label:'ℹ️ 基础牌',sub:d.deploy,value:'info'});
+  // 【赵括】只能打出/纳贡/部署，无法弃置；卫国国策同样不可弃置臣/将
+  if(!((KING(me).mgNoDrop||c.name==='赵括')&&isMG)) opts.push({label:'🗑 弃置',value:'drop'});
+  const act=await uiChoice(`【${c.name}】`, '', opts, {allowClose:true});
+  if(!act) return;
+  if(act==='deploy'){ await deployCard(me,c); }
+  else if(act==='play'){ await playMinisterGeneral(me,c); }
+  else if(act==='skill'){ await playSkill(me,c); }
+  else if(act==='event'){ await playEvent(me,c); }
+  else if(act==='trade'){ toast('请点击上方「🤝 交易」按钮，在筹码中选择这张牌'); }
+  else if(act==='drop'){ removeFromHand(me,c); G.discard.push(c); log(`${me.name} 弃置1张牌。`,'sys'); render(); }
+}
+
+/* ---------------- 臣 / 将 打出效果 ---------------- */
+async function playMinisterGeneral(p,c){
+  removeFromHand(p,c);
+  const canTwice=(c.type==='臣'&&KING(p).ministerTwice)||(c.type==='将'&&KING(p).generalTwice);
+  p.playedTwice=p.playedTwice||{};
+  const ok=await execMG(p,c);
+  if(!ok){ p.hand.push(c); render(); return; }
+  if(canTwice&&!p.playedTwice[c.uid]){
+    p.playedTwice[c.uid]=true;
+    let again;
+    if(p.human) again=await asActor(p,()=>uiYesNo('国家加成','你可再次打出这张牌的效果。使用吗？'));
+    else again=Math.random()<0.5;
+    if(again){ log(`${p.name} 依国策再次打出【${c.name}】！`); await execMG(p,c); }
+  }
+  G.discard.push(c);
+  render();
+}
+async function execMG(p,c){
+  const othersP=others(p);
+  if(c.type==='臣'){
+    switch(c.name){
+      case '管仲':{
+        const payN=Math.min(4,p.hand.length);
+        if(payN<1){ log('手牌不足，无法向周天子纳贡，尊王攘夷取消。'); return false; }
+        for(let i=0;i<payN;i++){ const x=p.hand[rnd(p.hand.length)]; if(x){removeFromHand(p,x); G.tianzi.unshift(x);} }
+        log(`🏛 ${p.name} 向周天子牌堆纳贡 ${payN} 张牌（可取回）。`,'sys');
+        const t=await pickPlayerGeneric(p,othersP,'尊王攘夷：指定攘夷目标');
+        if(!t){ return false; }
+        log(`📢 ${p.name} 打出管仲【尊王攘夷】！目标：${t.name}`,'war');
+        notify('📢 尊王攘夷', `${esc(p.name)} 向周天子牌堆纳贡 ${payN} 张牌，并指定 <b>${esc(t.name)}</b> 为攘夷目标。<br>
+          其余玩家必须对其打出【戈】或【盾】，否则被 ${esc(p.name)} 没收 1 张手牌。<br>
+          <span style="color:var(--ink2)">因攘夷打出的【戈】所攻下的城池，全部归 ${esc(p.name)}。</span>`, {auto:!p.human});
+        for(const o of othersP){ if(o===t||!o.alive) continue;
+          const mayAtk=canAttackTarget(o,t);   // 附庸不得攻击宗主
+          const ge=mayAtk?(o.hand.find(x=>x.name==='戈'||(KING(o).allAsGe&&x.type==='基础'))):null;
+          const sh=o.hand.find(x=>x.name==='盾'||(KING(o).allAsBasic&&x.type==='基础'&&x.name!=='戈'));
+          if(ge){ removeFromHand(o,ge); G.discard.push(ge);
+            await resolveStrike(o,t,'攘夷',{gainTo:p});
+          } else if(sh){ removeFromHand(o,sh); G.discard.push(sh); log(`${o.name} 打出盾回应攘夷。`); }
+          else if(o.hand.length){ const x=o.hand[rnd(o.hand.length)];
+            if(await relicRefuse(o,`${p.name} 的【尊王攘夷】要没收你的1张手牌`)){ log(`${o.name} 以【和氏璧】拒绝了没收。`,'sys'); }
+            else { removeFromHand(o,x); p.hand.push(x); log(`${o.name} 被没收1张手牌。`); } }
+        }
+        break; }
+      case '晏婴':{ const t=await pickPlayerGeneric(p,othersP,'晏子使楚：选择目标'); if(!t) {return false;}
+        if(await relicRefuse(t,`${p.name} 的【晏子使楚】要取走你全部布币与粮草`)){
+          log(`💎 ${t.name} 以【和氏璧】拒绝了【晏子使楚】。`,'sys'); break;
+        }
+        const got=t.hand.filter(x=>x.name==='布币'||x.name==='粮草');
+        got.forEach(x=>removeFromHand(t,x)); p.hand.push(...got);
+        log(`💰 ${p.name} 打出晏婴【晏子使楚】，获得 ${t.name} 的 ${got.length} 张布币/粮草。`,'good'); break; }
+      case '孙膑':{ if(!p.hand.length){ log('你已无手牌，【减灶诱敌】无从弃牌，牌已归还。'); return false; }
+        const n0=p.hand.length;
+        G.discard.push(...p.hand.splice(0));
+        const got0=drawCards(p,n0);
+        log(`🍲 ${p.name} 打出孙膑【减灶诱敌】：弃掉全部 ${n0} 张手牌，从牌堆取回 ${got0.length} 张。`,'good');
+        notify('🍲 减灶诱敌', `${esc(p.name)} 弃掉全部手牌（${n0} 张），并从牌堆取回等量的 <b>${got0.length}</b> 张牌。`, {auto:!p.human});
+        break; }
+      case '商鞅':{ const sorted=[...othersP].sort((a,b)=>b.cities-a.cities);
+        if(!sorted.length) {return false;}
+        const t=sorted[0];
+        if(await junxingBlockSkill(t,'刑无等级')) break;
+        t.cities=Math.max(0,t.cities-2); p.cities+=2;
+        log(`⚔ ${p.name} 打出商鞅【刑无等级】，夺取 ${t.name} 2座城池！`,'war');
+        onCitiesChanged(); if(t.cities<=0) await handleDefeat(p,t);
+        break; }
+      case '范蠡':{ let n=0;
+        ['minister','general'].forEach(s=>{ if(p.dep[s]){ G.discard.push(p.dep[s]); p.dep[s]=null; n++; } });
+        for(let i=0;i<n;i++){ drawCoin(p); drawCards(p,1); }
+        log(`💼 ${p.name} 打出范蠡【鸟尽弓藏】：弃置 ${n} 张部署牌，获得 ${n*2} 布币并摸 ${n} 张牌。`); break; }
+    case '子产':{ let total=0; alive().forEach(x=>{ total+=x.hand.filter(y=>y.name==='戈').length; });
+        if(G&&G.tutorial) total=4;   // 教程演示：固定按 4 张戈结算，摸 4 张牌
+        drawCards(p,total); log(`📜 ${p.name} 打出子产【丘赋之制】：全场共 ${total} 张戈，摸 ${total} 张牌。`);
+        if(G&&G.tutorial&&p.human){ G.tut.done.qifu=true; tutAdvance(); }
+        break; }
+      case '苏秦':{
+        const grains=p.hand.filter(x=>x.name==='粮草');
+        const maxN=Math.min(grains.length,othersP.length);
+        if(!maxN){ log('手中没有粮草或没有其他国家，【六国合纵】取消，牌已归还。'); return false; }
+        // 选择要分赠的粮草（自定义数量，每国1张）
+        let given=[];
+        if(p.human){
+          const sel=await asActor(p,()=>uiPickCards('【六国合纵】',`选择要分赠的粮草（1～${maxN} 张，每张赠给一个国家；每赠出 1 张就对城池最多的玩家造成 1 点城池伤害）`,grains,
+            {min:1,max:maxN,allowSkip:true,skipLabel:'✖ 取消'}));
+          if(!sel||!sel.length) return false;
+          given=sel;
+        }else given=grains.slice(0,maxN);
+        // 逐国选择受赠对象
+        const targets=[];
+        for(let i=0;i<given.length;i++){
+          const rest=othersP.filter(x=>!targets.includes(x));
+          const t=await pickPlayerGeneric(p,rest,`【六国合纵】第 ${i+1}/${given.length} 张粮草赠给哪个国家？`,true);
+          if(!t) break;
+          targets.push(t);
+        }
+        if(!targets.length){ log('未选择受赠国家，【六国合纵】取消，牌已归还。'); return false; }
+        targets.forEach((t,i)=>{ removeFromHand(p,given[i]); t.hand.push(given[i]); });
+        const dmg=targets.length;
+        const t=[...othersP].sort((a,b)=>b.cities-a.cities)[0];
+        log(`🚩 ${p.name} 打出苏秦【六国合纵】：向 ${targets.map(x=>x.name).join('、')} 各赠 1 粮草（共 ${dmg} 张），并讨伐城池最多的 ${t.name}（${dmg} 城伤害）！`,'war');
+        notify('🚩 六国合纵', `${esc(p.name)} 向 ${esc(targets.map(x=>x.name).join('、'))} 各赠送 1 张粮草（共 <b>${dmg}</b> 张）。<br>
+          对城池最多的 <b>${esc(t.name)}</b> 造成 <b>${dmg}</b> 点城池伤害，攻下的城池<b>全部归 ${esc(p.name)}</b>。`, {auto:!p.human});
+        if(await junxingBlockSkill(t,'六国合纵')){ break; }
+        await resolveStrike(p,t,'合纵',{gainTo:p,dmgBase:dmg}); break; }
+      case '张仪':{
+        if(!othersP.length){ return false; }
+        const t=await pickPlayerGeneric(p,othersP,'割地欺楚：选择目标（你须按其手牌数的一半转移城池，并夺取其全部手牌）');
+        if(!t){ return false; }
+        const need=Math.ceil(t.hand.length/2);
+        if(p.cities<=need){
+          log(`【割地欺楚】需转移 ${need} 座城池（对方手牌 ${t.hand.length} 张 ÷2 向上取整），你只有 ${p.cities} 座，无法发动，牌已归还。`,'sys');
+          notify('⚠️ 无法发动', `【割地欺楚】需转移 <b>${need}</b> 座城池（对方手牌 ${t.hand.length} 张 ÷2 向上取整），而你只有 ${p.cities} 座——技能无法发动，牌已退回手中。`, {auto:!p.human});
+          return false; }
+        if(await relicRefuse(t,`${p.name} 的【割地欺楚】要以 ${need} 座城池换取你的全部手牌`)){
+          log(`💎 ${t.name} 以【和氏璧】拒绝了 ${p.name} 的【割地欺楚】。`,'sys'); break; }
+        const got=t.hand.splice(0);
+        p.hand.push(...got);
+        for(let i=0;i<need;i++){ p.cities--; t.cities++; }
+        log(`🎭 ${p.name} 打出张仪【割地欺楚】：转移 ${need} 座城池给 ${t.name}，夺取其全部 ${got.length} 张手牌！`,'war');
+        notify('🎭 割地欺楚', `${esc(p.name)} 转移 <b>${need}</b> 座城池给 ${esc(t.name)}，并夺取其全部 <b>${got.length}</b> 张手牌。`, {auto:!p.human});
+        onCitiesChanged(); render(); break; }
+      case '孔子':{
+        let n=0;
+        for(const o of othersP){
+          if(!o.alive||!o.hand.length) continue;
+          if(await relicRefuse(o,`${p.name} 的【礼乐征伐】要你纳贡1张手牌`)) continue;
+          let x=null;
+          if(o.human){ const sel=await asActor(o,()=>uiPickCards('【礼乐征伐】·纳贡',`${p.name} 打出【礼乐征伐】，你须纳贡 1 张手牌给对方`,o.hand,{min:1,max:1})); x=sel?sel[0]:o.hand[0]; }
+          else x=[...o.hand].sort((a,b)=>resVal(a)-resVal(b))[0];
+          if(x){ removeFromHand(o,x); p.hand.push(x); n++; }
+        }
+        log(`🎵 ${p.name} 打出孔子【礼乐征伐】：全场各向其纳贡 ${n} 张手牌，并恢复1次掷骰。`,'gold');
+        notify('🎵 礼乐征伐', `所有其他玩家各向 <b>${esc(p.name)}</b> 纳贡 1 张手牌（共 ${n} 张）。<br>随后立即<b>恢复一次六艺掷骰</b>。`, {auto:!p.human});
+        await rollLiuyi(alive(),'孔子·礼乐征伐');
+        break; }
+    }
+  }else{ // 将
+    switch(c.name){
+      case '孙武':{ if(geCount(p)<=0){ log('手中没有【戈】牌，【兵家至圣】无法生效，牌已归还。'); return false; }
+        TF.bingjia=p.id;
+        log(`🏹 ${p.name} 打出孙武【兵家至圣】：本回合所有【戈】攻击无需支付粮草/布币，且无视距离。`,'gold');
+        notify('🏹 兵家至圣', `${esc(p.name)} 本回合内所有【戈】攻击：<br>· <b>无需支付</b>粮草/布币消耗<br>· <b>无视距离</b>，亦无需买路<br>· 仍须打出【戈】牌`, {auto:!p.human});
+        break; }
+      case '伍子胥':{ if(p.hand.length<3){ log('手牌不足 3 张，【一夜白头】无法生效，牌已归还。'); return false; }
+        const sel=await pickCardsGeneric(p,'【一夜白头】弃置至少3张手牌',3,Math.min(5,p.hand.length));
+        if(!sel||sel.length<3){ return false; }
+        const n=Math.min(5,sel.length);
+        sel.forEach(x=>{removeFromHand(p,x);G.discard.push(x);});
+        const t=await pickPlayerGeneric(p,othersP,'指定损失城池的目标');
+        if(t){
+          if(await junxingBlockSkill(t,'一夜白头')){ break; }
+          const d=Math.min(n,t.cities); t.cities-=d; p.cities+=d;
+          log(`💀 ${p.name} 打出伍子胥【一夜白头】，${t.name} 损失 ${d} 座城池！`,'war');
+          onCitiesChanged(); if(t.cities<=0) await handleDefeat(p,t); }
+        break; }
+      case '廉颇':{
+        const ges=p.hand.filter(x=>x.name==='戈'||(KING(p).allAsGe&&x.type==='基础'));
+        const gr=p.hand.find(x=>x.name==='粮草');
+        if(ges.length<5||!gr){ log('【破燕拜相】需一次性打出 5 张【戈】+1 张【粮草】，条件不足，牌已归还。'); return false; }
+        const t=await pickPlayerGeneric(p,othersP,'破燕拜相：选择目标（造成 5 点城池伤害，无法被防御）');
+        if(!t){ return false; }
+        ges.slice(0,5).forEach(x=>{removeFromHand(p,x); G.discard.push(x);});
+        removeFromHand(p,gr); G.discard.push(gr);
+        log(`🏹 ${p.name} 打出廉颇【破燕拜相】：一次性打出 5 戈 + 1 粮草！`,'war');
+        notify('🏹 破燕拜相', `${esc(p.name)} 一次性打出 <b>5 张【戈】+1 张【粮草】</b>，对 ${esc(t.name)} 造成 <b>5 点</b>城池伤害——<b>无法被防御</b>。`, {auto:!p.human});
+        await resolveStrike(p,t,'破燕拜相',{dmgBase:5,unblockable:'all'});
+        break; }
+      case '赵奢':{ TF.fenggong=p.id; log(`🛡 ${p.name} 打出赵奢【奉公守法】：本回合技能无法对其生效；每被攻击获1布币。`); break; }
+      case '白起':{ const cands=othersP.filter(x=>x.cities>=5);
+        if(!cands.length){ log('无城池≥5的玩家，【长平坑卒】取消，牌已归还。'); return false; }
+        const t=await pickPlayerGeneric(p,cands,'长平坑卒：选择对掷对象');
+        if(!t){ return false; }
+        const a=1+rnd(6), b=1+rnd(6);
+        log(`🎲 ${p.name} 掷 ${a}，${t.name} 掷 ${b}`,'war');
+        notify('🎲 长平坑卒 · 对掷', `<b>${esc(p.name)}</b> 掷出 <span style="color:var(--seal);font-size:20px">${a}</span>　vs　<b>${esc(t.name)}</b> 掷出 <span style="color:var(--seal);font-size:20px">${b}</span><br><br>`
+          +(a>=b?`<b>${esc(p.name)} 点数≥对方</b>：${esc(t.name)} 损失 <b>3</b> 座城池。`:`<b>${esc(p.name)} 点数不足</b>：其自身损失 <b>2</b> 座城池。`), {auto:!p.human});
+        if(a>=b){ t.cities=Math.max(0,t.cities-3); p.cities+=3; log(`${p.name} 胜！${t.name} 损失3城。`,'war'); if(t.cities<=0) await handleDefeat(p,t); }
+        else { p.cities=Math.max(0,p.cities-2); t.cities+=2; log(`${p.name} 败！损失2城。`,'war'); if(p.cities<=0) await handleDefeat(t,p); }
+        break; }
+      case '王翦':{ const sel=await pickCardsGeneric(p,'【六十万军】弃置2张手牌',2,2);
+        if(!sel||sel.length<2){ return false; }
+        sel.forEach(x=>{removeFromHand(p,x);G.discard.push(x);});
+        TF.liushiwann=p.id; log(`🏹 ${p.name} 打出王翦【六十万军】：本回合每次攻击可波及目标的相邻玩家。`); break; }
+      case '乐毅':{ const vas=othersP.filter(x=>isVassalOf(x,p));
+        if(!vas.length){ log('你没有附庸，效果取消。'); return false; }
+        const t=await pickPlayerGeneric(p,vas,'济上之盟：指定你的附庸');
+        if(!t){ return false; }
+        t.cities=0; p.hand.push(...t.hand.splice(0));
+        log(`🏯 ${p.name} 打出乐毅【济上之盟】：${t.name} 城池归零，手牌尽归 ${p.name}。`,'war');
+        let choice;
+        if(t.human) choice=await asActor(t,()=>uiChoice('济上之盟','你已一无所有',[
+          {label:'重新成为其附庸',value:'vassal'},{label:'退出游戏（出局）',value:'out'}]));
+        else choice=Math.random()<0.6?'vassal':'out';
+        if(choice==='vassal'){ t.vassalOf=p.id; t.cities=1; p.cities--; log(`${t.name} 重新臣服。`); }
+        else { t.alive=false;t.out=true; log(`${t.name} 出局。`,'war'); }
+        render(); checkVictories(); break; }
+      case '曹刿':{ TF.zheluan=p.id;
+        log(`🚩 ${p.name} 打出曹刿【辙乱旗靡】：本回合攻击时，若目标手牌≥5，本次伤害 +1。`,'gold');
+        notify('🚩 辙乱旗靡', `${esc(p.name)} 本回合内攻击时，若目标手牌 ≥5 张，本次城池伤害 <b>+1</b>。`, {auto:!p.human});
+        break; }
+      case '赵括':{
+        const t=await pickPlayerGeneric(p,othersP,'长平之败：指定掷骰的玩家');
+        if(!t){ return false; }
+        const r=1+rnd(6);
+        log(`🎲 ${t.name} 掷出 <b>${r}</b>`,'war');
+        notify('🎲 长平之败 · 掷骰', `<b>${esc(t.name)}</b> 掷出 <span style="color:var(--seal);font-size:20px">${r}</span><br><br>`
+          +(r>=3?`点数 ≥3：<b>${esc(p.name)} 获得其 3 座城池</b>。`:`点数 <3：<b>${esc(p.name)} 须将全部手牌交给其</b>。`), {auto:!p.human&&!t.human});
+        if(r>=3){ const d=Math.min(3,t.cities); t.cities-=d; p.cities+=d;
+          log(`⚔ ${p.name} 获 ${t.name} ${d} 座城池！`,'war'); onCitiesChanged(); if(t.cities<=0) await handleDefeat(p,t); }
+        else { const got=p.hand.splice(0); t.hand.push(...got);
+          log(`💧 ${p.name} 点数不足，将全部 ${got.length} 张手牌交给 ${t.name}。`,'sys'); }
+        break; }
+      case '田单':{ if(p.cities<=3){ const need=5-p.cities; p.cities=5;
+          let rec=await recoverFromDiscard(p,2);
+          log(`🐂 ${p.name} 打出田单【复国破燕】：城池补至5座（+${need}），并回收 ${rec} 张牌。`,'good'); }
+        else { log('城池>3，【复国破燕】无效果。'); return false; }
+        break; }
+    }
+  }
+  checkVictories();
+  return true;
+}
+async function freeGeAttacks(p,maxN){
+  let n=0;
+  while(n<maxN&&p.alive){
+    const ges=p.hand.filter(x=>x.name==='戈'||(KING(p).allAsGe&&x.type==='基础'));
+    if(!ges.length) break;
+    const cands=others(p).filter(x=>canAttackTarget(p,x));
+    if(!cands.length) break;
+    let t;
+    if(p.human){ t=await pickPlayerGeneric(p,cands,`免费追加攻击（剩余${maxN-n}次）`,true); if(!t) break; }
+    else { t=pick(cands); }
+    const ge=ges[0]; removeFromHand(p,ge); G.discard.push(ge);
+    await resolveStrike(p,t); n++;
+  }
+}
+/* 从普通牌堆直接新部署一张指定类型的牌（劝学尊师 / 兵势奇正） */
+async function deployNewFromNormal(p,type){
+  const slot = type==='臣'?'minister':'general';
+  const uniq=[]; const seen={};
+  G.normal.forEach(c=>{ if(c.type===type && !seen[c.name]){ seen[c.name]=1; uniq.push(c); } });
+  if(!uniq.length){
+    log(`普通牌堆中没有可部署的【${type}】牌，效果取消，牌已归还。`,'sys');
+    notify('⚠️ 无法生效', `普通牌堆中没有可部署的【${type}】牌，该技能牌已退回手中。`, {auto:true});
+    return false;
+  }
+  let card=null;
+  if(p.human){
+    const sel=await asActor(p,()=>uiPickCards(`新部署一张${type}牌`,`从普通牌堆中选择1张【${type}】牌，直接部署到你的场上（替换原牌）`,
+      uniq,{min:1,max:1,allowSkip:true,skipLabel:'✖ 取消'}));
+    if(sel&&sel.length) card=sel[0];
+  }else{
+    card=pick(uniq);
+  }
+  if(!card) return false;
+  const i=G.normal.indexOf(card); if(i>=0) G.normal.splice(i,1);
+  if(p.dep[slot]) G.discard.push(p.dep[slot]);
+  p.dep[slot]=card;
+  log(`🔄 ${p.name} 直接部署了${type}【${card.name}】（自普通牌堆）。`,'good');
+  if(type==='臣'&&card.name==='商鞅') enforceShangyang();
+  render();
+  return true;
+}
+async function recoverFromDiscard(p,maxN){
+  let n=0;
+  if(p.human){
+    const sel=await asActor(p,()=>uiPickCards('回收弃牌堆',`从弃牌堆回收至多 ${maxN} 张`,G.discard.slice(-10),{min:0,max:maxN,allowSkip:true}));
+    if(sel){ sel.forEach(c=>{const i=G.discard.indexOf(c); if(i>=0)G.discard.splice(i,1); p.hand.push(c); n++;}); }
+  }else{
+    for(let i=0;i<maxN&&G.discard.length;i++){ p.hand.push(G.discard.pop()); n++; }
+  }
+  return n;
+}
+async function pickPlayerGeneric(p,cands,desc,allowSkip=false){
+  if(!cands.length) return null;
+  if(p.human) return await asActor(p,()=>uiPickPlayer('选择目标',desc,cands,{allowSkip}));
+  return pick(cands);
+}
+async function pickCardsGeneric(p,desc,min,max){
+  if(p.human) return await asActor(p,()=>uiPickCards('选牌',desc,p.hand,{min,max}));
+  const sorted=[...p.hand].sort((a,b)=>resVal(a)-resVal(b));
+  return sorted.slice(0,Math.min(max,sorted.length));
+}
+
+/* ---------------- 技能牌 ---------------- */
+async function playSkill(p,c){
+  removeFromHand(p,c);
+  G.lastSkill=c.name; // 供别类察今复制（打出即生效）
+  const othersP=others(p);
+  switch(c.name){
+    case '始计庙算':{ const t=await pickPlayerGeneric(p,othersP,'查看谁的手牌？'); if(!t){p.hand.push(c);return;}
+      if(await junxingBlockSkill(t,'始计庙算')){ break; }
+      if(p.human){ await asActor(p,()=>uiPickCards(`${t.name} 的手牌`,`${t.hand.length} 张`,t.hand,{min:0,max:0,allowSkip:true})); }
+      const geN=t.hand.filter(x=>x.name==='戈').length;
+      drawCards(p,Math.min(3,geN)); log(`👁 ${p.name}【始计庙算】查看 ${t.name} 手牌，摸 ${Math.min(3,geN)} 张。`); break; }
+    case '作战速胜':{ TF.zuozhan=p.id; log(`⚡ ${p.name}【作战速胜】：本回合戈命中额外+1城。`); break; }
+    case '谋攻克敌':{ const cands=othersP.filter(x=>seatDistance(p,x)>=2);
+      const paid=await payResource(p,'粮草',2,'谋攻克敌');
+      if(!paid||paid.length<2){ p.hand.push(c); log('粮草不足，效果取消。'); return; }
+      const t=cands.length?await pickPlayerGeneric(p,cands,'谋攻克敌：目标'):null;
+      if(!t){ p.hand.push(c); return; }
+      if(await junxingBlockSkill(t,'谋攻克敌')){ break; }
+      t.cities=Math.max(0,t.cities-1); p.cities++;
+      log(`🎯 ${p.name}【谋攻克敌】：${t.name} 损失1城（不可被盾抵消）。`,'war');
+      onCitiesChanged(); if(t.cities<=0) await handleDefeat(p,t); break; }
+    case '军形先胜':{ G.junxing={id:p.id,n:2};
+      log(`🛡 ${p.name}【军形先胜】：获得2层【先胜】护盾（可挡1次伤害／免疫1张技能牌，直到被消耗）。`);
+      notify('🛡 军形先胜', `${esc(p.name)} 获得 <b>2 层【先胜】护盾</b>（一直有效，直到被消耗）：<br>
+        · 可<b>完全抵挡 1 次</b>攻击造成的城池伤害<br>· 可令 <b>1 张</b>针对其的技能牌失效`, {auto:!p.human});
+      break; }
+    case '兵势奇正':{ const r=await deployNewFromNormal(p,'将'); if(!r){ p.hand.push(c); return; }
+      break; }
+    case '虚实避实':{ const t=await pickPlayerGeneric(p,othersP,'虚实避实：其盾失效，你攻其消耗-2'); if(!t){p.hand.push(c);return;}
+      if(await junxingBlockSkill(t,'虚实避实')){ break; }
+      TF.xushiTarget=t; log(`🌀 ${p.name}【虚实避实】指向 ${t.name}。`); break; }
+    case '军争迂直':{ const t=await pickPlayerGeneric(p,othersP,'军争迂直：与谁互换座位？（永久换座，距离立刻重新结算）'); if(!t){p.hand.push(c);return;}
+      const siA=G.players.indexOf(p), siB=G.players.indexOf(t);
+      [G.players[siA],G.players[siB]]=[G.players[siB],G.players[siA]];
+      log(`🔁 ${p.name}【军争迂直】：与 ${t.name} 互换座位（永久），全场距离重新结算。`); break; }
+    case '九变杂于':{
+      TF.dmgPlus=(TF.dmgPlus||0)+1; TF.dmgPlusBy=p.id;
+      TF.attackCostMod=(TF.attackCostMod||0)+1; TF.costModBy=p.id;
+      log(`📖 ${p.name}【九变杂于】：本回合攻击伤害+1，攻击消耗+1。`,'gold');
+      notify('📖 九变杂于', `${esc(p.name)} 本回合内：<br>· 每次攻击<b>伤害 +1</b> 座城池<br>· 每次攻击<b>消耗 +1</b> 粮草/布币`, {auto:!p.human});
+      break; }
+    case '行军处军':{ let n=0; ['minister','general','relic'].forEach(s=>{ if(p.dep[s]){p.hand.push(p.dep[s]); p.dep[s]=null; n++;} });
+      drawCards(p,n); log(`🏗 ${p.name}【行军处军】：收回 ${n} 张部署牌并摸 ${n} 张牌。`); break; }
+    case '用间五俱':{ const cands=othersP.filter(x=>x.vassalOf!=null);
+      const t=cands.length?await pickPlayerGeneric(p,cands,'用间五俱：策反哪家的附庸？'):null;
+      if(!t){p.hand.push(c);return;}
+      if(await junxingBlockSkill(t,'用间五俱')){ break; }
+      if(await relicRefuse(t,`${p.name} 的【用间五俱】要夺取你的1城2牌`)){ break; }
+      t.cities--; p.cities++;
+      for(let i=0;i<2&&t.hand.length;i++){ const x=t.hand[rnd(t.hand.length)]; removeFromHand(t,x); p.hand.push(x); }
+      log(`🕵 ${p.name}【用间五俱】：策反 ${t.name}，夺取1城2牌。`,'war');
+      onCitiesChanged(); if(t.cities<=0) await handleDefeat(p,t); break; }
+    case '贵公去私':{ let n=0;
+      for(const o of othersP){
+        if(!o.hand.length) continue;
+        if(await relicRefuse(o,`${p.name} 的【贵公去私】要取走你1张手牌`)) continue;
+        let x=null;
+        if(o.human) { const sel=await asActor(o,()=>uiPickCards('【贵公去私】','所有其他玩家各转移1张手牌给对方，请选择你要交出的1张',o.hand,{min:1,max:1})); x=sel?sel[0]:o.hand[0]; }
+        else x=o.hand[rnd(o.hand.length)];
+        if(x){ removeFromHand(o,x); p.hand.push(x); n++; }
+      }
+      log(`⚖ ${p.name}【贵公去私】：全场各转移1张手牌给 ${p.name}（共 ${n} 张）。`); break; }
+    case '仲春纪':{
+      const n=alive().length+1;
+      const got=[];
+      for(let i=0;i<n;i++){ const x=drawOne(); if(x) got.push(x); }
+      const mine=got.splice(0,2); p.hand.push(...mine);
+      const ord=seatOrderFrom(p).filter(x=>x!==p&&x.alive);   // 其余玩家，按出牌顺序
+      let k=0;
+      while(got.length){
+        if(ord.length) ord[k%ord.length].hand.push(got.shift());
+        else G.discard.push(got.shift());
+        k++;
+      }
+      log(`🌸 ${p.name}【仲春纪】：从普通牌堆取 ${n} 张——自己得2张，其余按出牌顺序分给其他玩家。`,'gold');
+      for(const x of seatOrderFrom(p)){
+        if(!x.hand.length) continue;
+        let cc=null;
+        if(x.human){ const sel=await asActor(x,()=>uiPickCards('【仲春纪】·朝贡','所有人须朝贡1张牌至周天子牌堆',x.hand,{min:1,max:1})); cc=sel?sel[0]:x.hand[0]; }
+        else cc=[...x.hand].sort((a,b)=>resVal(a)-resVal(b))[0];
+        if(cc){ removeFromHand(x,cc); G.tianzi.unshift(cc); }
+      }
+      log(`🌸【仲春纪】：全员各朝贡1张牌至周天子牌堆。`);
+      notify('🌸 仲春纪', `从普通牌堆取 <b>${n}</b> 张（玩家数+1）：<br>
+        · ${esc(p.name)} 领取 <b>2</b> 张<br>
+        · 其余按出牌顺序由其他玩家领取<br><br>
+        随后 <b>所有玩家各朝贡 1 张</b>牌至周天子牌堆。`, {auto:!p.human});
+      break; }
+    case '圜道循环':{ for(let i=0;i<5&&G.discard.length;i++){ G.normal.unshift(G.discard.pop()); }
+      drawCards(p,1); log(`☯ ${p.name}【圜道循环】：弃牌堆顶5张洗入普通牌堆，摸1张。`); break; }
+    case '贵生重己':{ if(!othersP.length){ p.hand.push(c); return; }
+      const t=await pickPlayerGeneric(p,othersP,'贵生重己：将1座城池赠与谁？（你随后从普通牌堆摸6张牌）',true);
+      if(!t){ p.hand.push(c); return; }
+      p.cities--; t.cities++;
+      const g=drawFromNormal(p,6);
+      log(`🍃 ${p.name}【贵生重己】：赠 ${t.name} 1座城池，从普通牌堆摸 ${g.length} 张牌。`);
+      onCitiesChanged(); if(t.cities<=0) await handleDefeat(p,t); break; }
+    case '当染慎交':{ const sel=await pickPlayers2(p,othersP); if(sel){ TF.dangran=sel.map(x=>x.id); log(`🚫 ${p.name}【当染慎交】：${sel.map(x=>x.name).join('、')} 本回合无法攻击/用技于其。`);} else p.hand.push(c); break; }
+    case '劝学尊师':{ const r=await deployNewFromNormal(p,'臣'); if(!r){ p.hand.push(c); return; }
+      break; }
+    case '首时待机':{ p.skipNextPlay=true; p.nextExtraDraw=3; log(`⏳ ${p.name}【首时待机】：下回合跳过出牌阶段，但摸牌阶段多摸3张。`); break; }
+    case '义赏诛暴':{ const cands=othersP.filter(x=>x.cities>p.cities);
+      const t=cands.length?await pickPlayerGeneric(p,cands,'义赏诛暴：目标'):null;
+      if(!t){p.hand.push(c);return;}
+      if(await junxingBlockSkill(t,'义赏诛暴')){ break; }
+      const coin=t.hand.find(x=>x.name==='布币'), grain=t.hand.find(x=>x.name==='粮草');
+      if(coin){ removeFromHand(t,coin); p.hand.push(coin); log(`${t.name} 交出1布币。`); }
+      else if(grain){ removeFromHand(t,grain); p.hand.push(grain); log(`${t.name} 交出1粮草。`); }
+      else { t.cities=Math.max(0,t.cities-1); p.cities++; log(`⚡ ${t.name} 无物可交，损失1城！`,'war'); onCitiesChanged(); if(t.cities<=0) await handleDefeat(p,t); }
+      break; }
+    case '别类察今':{ const n=Math.min(3,G.discard.length);
+      if(!n){ log('弃牌堆为空，【别类察今】无效果，牌已归还。'); p.hand.push(c); return; }
+      const got=[];
+      for(let i=0;i<n;i++) got.push(G.discard.pop());
+      p.hand.push(...got);
+      log(`📚 ${p.name}【别类察今】：从弃牌堆拿回最上面的 ${n} 张（${got.map(x=>x.name).join('、')}）。`,'good'); break; }
+    case '任数用众':{ const vasN=G.players.filter(x=>x.alive&&x.vassalOf!=null).length;
+      if(geCount(p)<=0||vasN<=0){ p.hand.push(c); return; }
+      await freeGeAttacks(p,Math.min(3,vasN)); break; }
+  }
+  if(G&&G.tutorial&&p.human&&(c.name==='作战速胜'||c.name==='始计庙算')){ G.tut.done[c.name]=true; tutAdvance(); }
+  // 百家争鸣事件：下轮每人可免费使用1次技能牌，打出后立即拿回
+  const bj=tableFx('百家争鸣');
+  if(bj&&!fxConsumed(bj,p.id)){
+    fxConsume(bj,p);
+    p.hand.push(c);
+    log(`📜 ${p.name} 依【百家争鸣】免费使用了技能牌【${c.name}】，牌已拿回手牌。`,'good');
+  }else{
+    G.discard.push(c);
+  }
+  render(); checkVictories();
+}
+async function pickPlayers2(p,cands){
+  if(p.human){
+    const a=await asActor(p,()=>uiPickPlayer('【当染慎交】','选择第一名受保护玩家（取消则不发动）',cands,{allowSkip:true,skipLabel:'✖ 取消'}));
+    if(!a) return null;
+    const b=await asActor(p,()=>uiPickPlayer('【当染慎交】','选择第二名受保护玩家',cands.filter(x=>x!==a),{allowSkip:true,skipLabel:'✖ 取消'}));
+    if(!b) return null;
+    return [a,b];
+  }
+  return shuffle([...cands]).slice(0,2);
+}
+function geCount(p){ return p.hand.filter(c=>c.name==='戈'||(KING(p).allAsGe&&c.type==='基础')).length; }
+
+/* ---------------- 事件牌打出 ---------------- */
+const TABLE_EVENTS=['灾年','弑君','流言四起','官山海','尊王攘夷令','礼崩乐坏','百家争鸣'];
+function pushTable(name,card){ G.table.push({card,name,per:true,consumed:{},bornAt:G.turnSeq}); }
+async function playEvent(p,c){
+  removeFromHand(p,c);
+  const othersP=others(p);
+  let ok=true;
+  const DUR='<span style="color:var(--ink2);font-size:12px">该事件停留桌面：对每名玩家持续到其下个回合结束（每人各享有一整个回合），全员生效后回到弃牌堆。</span>';
+  switch(c.name){
+    case '灾年':{ pushTable('灾年',c);
+      log(`🌾 ${p.name} 打出事件【灾年】：所有人进攻消耗粮草-1。`,'gold');
+      notify('🌾 事件 · 灾年', `<b>所有人进攻消耗粮草 -1</b>。<br>${DUR}`); break; }
+    case '瘟疫':{ G.plague={holder:p.id, start:G.round, left:alive().length}; p.plague=true;
+      log(`🦠 ${p.name} 打出事件【瘟疫】：自己染上瘟疫，每轮传给下家，一整圈后消失。`,'gold');
+      notify('🦠 事件 · 瘟疫', `<b>${esc(p.name)}</b> 染上<b>瘟疫</b>状态！<br>· 每轮传给下家，传递一整圈后消失<br>· 进攻瘟疫状态者可少支付 1 点粮草`); break; }
+    case '弑君':{ pushTable('弑君',c);
+      log(`🗡 ${p.name} 打出事件【弑君】：所有人可自选出1次戈讨伐周天子。`,'gold');
+      notify('🗡 事件 · 弑君', `<b>每名玩家可自选出 1 次【戈】攻击周天子</b>：<br>· 春秋：打出戈后从<b>周天子牌堆获得 2 张牌</b><br>· 战国：对<b>称帝者</b>出戈，且粮草消耗为 0<br>${DUR}`); break; }
+    case '流言四起':{ pushTable('流言四起',c);
+      log(`🗣 ${p.name} 打出事件【流言四起】：所有人手牌公开。`,'gold');
+      notify('🗣 事件 · 流言四起', `<b>所有玩家的手牌互相公开</b>。<br>${DUR}`); break; }
+    case '官山海':{ pushTable('官山海',c);
+      log(`⛰ ${p.name} 打出事件【官山海】：所有人摸牌多1张。`,'gold');
+      notify('⛰ 事件 · 官山海', `所有人的<b>摸牌阶段多摸 1 张牌</b>。<br>${DUR}`); break; }
+    case '天子征伐':{
+      const emp=G.emperorId!=null?P(G.emperorId):null;
+      if(emp&&emp.alive){
+        const minC=others(emp).sort((a,b)=>a.cities-b.cities)[0];
+        if(minC){
+          emp.cities--; minC.cities++;
+          log(`⚔ ${p.name} 打出事件【天子征伐】：称帝者 ${emp.name} 转移1城给 ${minC.name}。`,'gold');
+          notify('⚔ 事件 · 天子征伐', `称帝者 <b>${esc(emp.name)}</b> 被迫转移 1 座城池给城池最少的 <b>${esc(minC.name)}</b>。`);
+          onCitiesChanged(); if(emp.cities<=0) await handleDefeat(minC,emp);
+        } else ok=false;
+      } else { ok=false; }
+      if(!ok){ log('无人称帝或无可转移目标，【天子征伐】无效，牌已退回。','sys'); }
+      break; }
+    case '厉兵秣马':{ alive().forEach(x=>x.hand.push(makeCard('戈','基础')));
+      log(`🐎 ${p.name} 打出事件【厉兵秣马】：所有人获得1张【戈】。`,'gold');
+      notify('🐎 事件 · 厉兵秣马', `<b>所有玩家获得 1 张【戈】</b>。`); break; }
+    case '周王赏赐':{ alive().forEach(x=>x.hand.push(makeCard('粮草','基础')));
+      log(`🎁 ${p.name} 打出事件【周王赏赐】：所有人获得1张【粮草】。`,'gold');
+      notify('🎁 事件 · 周王赏赐', `<b>所有玩家获得 1 张【粮草】</b>。`); break; }
+    case '天降祥瑞':{ alive().forEach(x=>drawCards(x,1));
+      log(`☁️ ${p.name} 打出事件【天降祥瑞】：所有人摸1张牌。`,'gold');
+      notify('☁️ 事件 · 天降祥瑞', `<b>所有玩家各摸 1 张牌</b>。`); break; }
+    case '尊王攘夷令':{ pushTable('尊王攘夷令',c);
+      log(`🏮 ${p.name} 打出事件【尊王攘夷令】：所有人攻城池最少者免粮草。`,'gold');
+      notify('🏮 事件 · 尊王攘夷令', `所有人对<b>城池最少的玩家</b>攻击<b>无需支付粮草</b>。<br>${DUR}`); break; }
+    case '礼崩乐坏':{ pushTable('礼崩乐坏',c);
+      log(`💀 ${p.name} 打出事件【礼崩乐坏】：所有附庸可攻击宗主。`,'gold');
+      notify('💀 事件 · 礼崩乐坏', `<b>所有附庸可攻击宗主</b>（犯上不受阻）。<br>${DUR}`); break; }
+    case '百家争鸣':{ pushTable('百家争鸣',c);
+      log(`📜 ${p.name} 打出事件【百家争鸣】：每人可免费使用1次技能牌（用后拿回）。`,'gold');
+      notify('📜 事件 · 百家争鸣', `每名玩家可<b>免费使用 1 次技能牌</b>：正常结算效果，但牌<b>立即拿回手牌</b>。<br>${DUR}`); break; }
+    case '烽火戏诸侯':{ log(`🔥 ${p.name} 打出事件【烽火戏诸侯】：所有人必须出1次戈或弃牌！`,'gold');
+      notify('🔥 事件 · 烽火戏诸侯', `狼烟四起！<b>所有人</b>必须不限目标地打出 1 次【戈】（免费攻击），<br>无戈者弃 2 张手牌，无牌者忽略。`);
+      await fenghuoEvent(p); break; }
+  }
+  if(!ok){ p.hand.push(c); render(); return; }
+  if(TABLE_EVENTS.includes(c.name)){
+    log(`📌 事件【${c.name}】停留在桌面，待全员生效窗口结束后回到牌堆。`,'sys');
+  }else{
+    G.discard.push(c);
+  }
+  render(); checkVictories();
+}
+async function fenghuoEvent(starter){
+  for(const x of seatOrderFrom(starter)){
+    if(!x.alive||G.over) continue;
+    const ges=x.hand.filter(cc=>cc.name==='戈'||(KING(x).allAsGe&&cc.type==='基础'));
+    const cands=others(x).filter(t=>canAttackTarget(x,t));
+    if(ges.length&&cands.length){
+      let t;
+      if(x.human){ t=await pickPlayerGeneric(x,cands,'【烽火戏诸侯】你的戈指向谁？（免费攻击；取消则改为弃牌）',true); }
+      else t=pick(cands);
+      if(t){
+        const ge=ges[0]; removeFromHand(x,ge); G.discard.push(ge);
+        log(`🔥 ${x.name} 响应烽火，向 ${t.name} 打出1张【戈】（免费攻击）！`,'war');
+        await resolveStrike(x,t,'烽火'); continue;
+      }
+    }
+    if(x.hand.length>=2){
+      for(let i=0;i<2&&x.hand.length;i++){ const cc=x.hand[rnd(x.hand.length)]; removeFromHand(x,cc); G.discard.push(cc); }
+      log(`${x.name} 无戈可用，弃置2张手牌。`,'sys');
+    }else if(x.hand.length===1){
+      const cc=x.hand[0]; removeFromHand(x,cc); G.discard.push(cc);
+      log(`${x.name} 无戈可用，弃置仅剩的1张手牌。`,'sys');
+    }else{
+      log(`${x.name} 无牌可弃，忽略烽火。`,'sys');
+    }
+  }
+}
+
+/* ---------------- 回合流程 ---------------- */
+function newTurnFlags(){ return {attackCostMod:0, costModBy:null, buyRoad:false, freeExUsed:false,
+  lianhengUsed:false, sanjusanUsed:false, kongziUsed:false, suihouUsed:false,
+  xuanliangUsed:false,
+  secondAtkUsed:false, buyCityUsed:false, buyDepUsed:false,
+  gePlayed:0, zheluan:null,
+  dmgPlus:0, dmgPlusBy:null, bingjia:null}; }
+async function runTurn(p){
+  G.curP=p; G.cur=G.players.indexOf(p);
+  NET.actor=p;                       // 联机：本回合的交互默认发给这位玩家
+  TF=newTurnFlags();
+  G.turnSeq=(G.turnSeq||0)+1;
+  p.lianpoUsed=false;                     // 廉颇【负荆请罪】：每个回合周期一次
+  render();
+  log(`—— <b>${p.name}（${p.kingdom}国·${KING(p).policy}）的回合</b> ——`,'gold');
+  if(!p.alive) return;
+  if(p.ruined){ log(`🏚 ${p.name} 亡国流亡中（第 ${p.rebornRound} 轮复国），本轮无法行动。`,'sys'); tableEndOfTurn(p); return; }
+  // 屈原【明于治乱】：每轮开始时，可查看周天子牌堆顶 5 张
+  if(hasDeploy(p,'minister','屈原')&&!RF['quyuan_'+p.id]){
+    RF['quyuan_'+p.id]=true;
+    const top=G.tianzi.slice(Math.max(0,G.tianzi.length-5)).slice().reverse();
+    if(p.human&&top.length){
+      await asActor(p,()=>uiPickCards('👁 明于治乱 · 天子牌堆顶','以下为周天子牌堆最上面的牌（仅供查看，点关闭继续）',top,{min:0,max:0,allowSkip:true,skipLabel:'✖ 关闭'}));
+    }else if(top.length) log(`👁 ${p.name} 依屈原【明于治乱】查看周天子牌堆顶 ${top.length} 张牌。`,'sys');
+  }
+  // 阶段1：摸牌
+  if(p.cities>0||true){
+    let n=3+(RF.drawExtra||0)+(p.nextExtraDraw||0)+(tableFx('官山海')?1:0)+(hasRelic(p,'传国玉玺')?1:0);
+    // 教程模式第一回合：人类玩家摸固定牌（保证丘赋之制演示时场上戈数=4）
+    if(G.tutorial&&G.round===1&&p.human){
+      const fixed=[];
+      ['粮草','盾','布币'].forEach(nm=>{ const i=G.tianzi.findIndex(c=>c.name===nm&&c.type==='基础');
+        if(i>=0) fixed.push(G.tianzi.splice(i,1)[0]); else fixed.push(makeCard(nm,'基础')); });
+      p.hand.push(...fixed);
+      log(`🀫 ${p.name} 摸牌 ${fixed.length} 张（粮草、盾、布币）。`);
+    }
+    else if(p.vassalOf!=null){
+      const got=drawCards(p,n,{watch:false});   // 附庸摸牌不计入【吴王夫差矛】
+      log(`🀫 附庸 ${p.name} 摸 ${got.length} 张 → 宗主 ${P(p.vassalOf).name} 取走1张。`);
+      const lord=P(p.vassalOf);
+      let taken;
+      if(lord.human){ const sel=await asActor(lord,()=>uiPickCards('宗主特权','从附庸摸的牌中取走1张',lord===p?[]:got,{min:1,max:1})); taken=sel?sel[0]:got[0]; }
+      else taken=got.sort((a,b)=>resVal(b)-resVal(a))[0];
+      if(taken){ removeFromHand(p,taken); lord.hand.push(taken); }
+      // 自留/打出1张 → 简化为全部自留（出牌阶段可自由打出）
+    }else{
+      const got=drawCards(p,n,{watch:false});   // 摸牌阶段不计入【吴王夫差矛】
+      log(`🀫 ${p.name} 摸牌 ${got.length} 张。`);
+    }
+    p.nextExtraDraw=0;
+  }
+  render();
+  // 事件【弑君】：本轮每名玩家可自选出1次戈（每人一次机会）
+  const sk=tableFx('弑君');
+  if(sk&&!fxConsumed(sk,p.id)){
+    const ge=p.hand.find(c=>c.name==='戈'||(KING(p).allAsGe&&c.type==='基础'));
+    let join=false;
+    if(ge&&G.era==='spring'){
+      if(p.human) join=await uiYesNo('🗡 事件 · 弑君','打出 1 张【戈】讨伐周天子：可从周天子牌堆获得 2 张牌。响应吗？（事件每人限一次）');
+      else join=Math.random()<0.5;
+      if(join){ removeFromHand(p,ge); G.discard.push(ge);
+        const got=[]; for(let i=0;i<2&&G.tianzi.length;i++) got.push(G.tianzi.pop());
+        p.hand.push(...got);
+        log(`🗡 ${p.name} 响应【弑君】：打出1戈，从周天子牌堆获得 ${got.length} 张牌。`,'gold');
+        if(G.tianzi.length===0) enterWarring(); }
+    }else if(ge&&G.era==='warring'){
+      const emp=G.emperorId!=null?P(G.emperorId):null;
+      if(emp&&emp.alive&&canAttackTarget(p,emp)){
+        if(p.human) join=await uiYesNo('🗡 事件 · 弑君',`打出 1 张【戈】讨伐称帝者 ${esc(emp.name)}（粮草消耗为 0）。响应吗？（事件每人限一次）`);
+        else join=Math.random()<0.5;
+        if(join){ removeFromHand(p,ge); G.discard.push(ge);
+          log(`🗡 ${p.name} 响应【弑君】：对称帝者 ${emp.name} 发起免费进攻！`,'war');
+          await resolveStrike(p,emp,'弑君'); }
+      }
+    }
+    fxConsume(sk,p);   // 每人一次机会（无论是否响应）
+  }
+  // 阶段2：出牌
+  const skipPlay=!!p.skipNextPlay;
+  p.skipNextPlay=false;
+  if(!skipPlay){
+    if(p.human) await humanPlayPhase(p);
+    else await aiPlayPhase(p);
+  } else {
+    log(`${p.name} 跳过出牌阶段【首时待机】。`,'sys');
+    notify('⏳ 首时待机', `${esc(p.name)} 依【首时待机】跳过本回合出牌阶段（此前已多摸 3 张牌）。`, {auto:!p.human});
+  }
+  // 阶段3：纳贡（只要周天子牌堆有牌就须纳贡，战国亦然；附庸无需纳贡；持【王子午鼎】者免纳贡）
+  if(hasRelic(p,'王子午鼎')){
+    log(`🏺 ${p.name} 依【王子午鼎】免于本回合纳贡。`,'sys');
+  } else if(G.tianzi.length>0&&p.vassalOf==null){
+    let tri=1+(RF.tributeExtra||0);
+    for(let i=0;i<tri;i++){
+      if(!p.hand.length) break;
+      let c;
+      if(p.human){ const sel=await asActor(p,()=>uiPickCards('纳贡',`选择 ${tri-i} 张牌放置到周天子牌堆底部`,p.hand,{min:1,max:1})); c=sel?sel[0]:p.hand[0]; }
+      else { const sorted=[...p.hand].sort((a,b)=>resVal(a)-resVal(b)); c=sorted[0]; }
+      if(c){ removeFromHand(p,c); G.tianzi.unshift(c); }
+    }
+    log(`🏛 ${p.name} 纳贡 ${tri} 张至周天子牌堆。`);
+  }
+  // 阶段4：结束——手牌上限（支持多选一次性弃置；【赵括】不可弃置）
+  const lim=handLimit(p);
+  const keepTypes = p.hand.filter(c=>{
+    const k=KING(p), m=p.dep.minister;
+    if(k.coinFree&&c.name==='布币') return false;
+    if(m&&m.name==='管仲'&&c.name==='布币') return false;
+    if(k.grainFree&&c.name==='粮草') return false;
+    if(k.mgFree&&(c.type==='臣'||c.type==='将')) return false;   // 卫：臣将不占手牌位
+    return true; });
+  const droppable=keepTypes.filter(c=>c.name!=='赵括');
+  const over=keepTypes.length-lim;
+  if(over>0){
+    const autoDrop=()=>{
+      const pool=[...droppable].sort((a,b)=>resVal(a)-resVal(b));
+      for(let i=0;i<over&&pool.length;i++){ const c2=pool[i]; removeFromHand(p,c2); G.discard.push(c2); }
+    };
+    if(p.human&&droppable.length){
+      const need=Math.min(over,droppable.length);
+      const sel=await asActor(p,()=>uiPickCards('手牌上限',`手牌超出上限 ${over} 张，请选择要弃置的牌（可一次多选；点「自动弃置」则由系统代选）`,droppable,
+        {min:need,max:need,allowSkip:true,skipLabel:'✖ 自动弃置'}));
+      if(sel&&sel.length){ sel.forEach(c=>{removeFromHand(p,c); G.discard.push(c);}); }
+      else autoDrop();
+    }else autoDrop();
+  }
+  if(p.vassalOf!=null){
+    // 宗主特权：收取除1城外所有城池（每回合）
+    const lord=P(p.vassalOf);
+    if(p.cities>1){ const take=p.cities-1; p.cities-=take; lord.cities+=take;
+      log(`🏛 宗主 ${lord.name} 无偿收取附庸 ${p.name} 的 ${take} 座城池。`); }
+  }
+  tableEndOfTurn(p);   // 桌面事件：对当前玩家的生效窗口到此结束
+  render(); checkVictories();
+  await sleep(400);
+}
+async function humanPlayPhase(p){
+  render();
+  NET.actor=p;                       // 联机：出牌阶段的所有提问都发给这位玩家
+  if(NET.mode==='host'&&isRemote(p)) NET.sendTo(p.netSeat,{t:'log',html:`—— <b>轮到你行动了</b> ——`,cls:'gold'});
+  await new Promise(res=>{ G.humanPhaseEnd=res; });
+}
+
+/* ---------------- 人类行动按钮 ---------------- */
+window.actAttack=async function(){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  const cands=others(me).filter(p=>canAttackTarget(me,p))
+    .sort((a,b)=>seatDistance(me,a)-seatDistance(me,b));   // 按距离从低到高排序
+  if(!cands.length){ toast('没有合法的攻击目标'); return; }
+  const blocked=others(me).filter(p=>!canAttackTarget(me,p));
+  const tgt=await uiPickPlayer('选择攻击目标','距离越远消耗越高（相邻 1、间隔一人 2…）；点下方按钮可取消本次攻击',cands,
+    {allowSkip:true,skipLabel:'✖ 取消攻击',info:p=>{
+      const d=seatDistance(me,p);
+      const mids=middlePlayers(me,p);
+      return `距离 ${d} · 预计消耗 ${calcCost(me,p)} · 你手中【戈】${geCount(me)}${mids.length?` · 途经 ${mids.map(x=>x.name).join('→')}`:''}`;
+    }});
+  if(!tgt) return;
+  if(blocked.length) log(`（${blocked.map(x=>x.name).join('、')} 为你的宗主，不可攻击）`,'sys');
+  await doAttack(me,tgt);
+  render();
+};
+window.actEnd=async function(){
+  const me=G.me;
+  if(!myTurn()){ toast('⏳ 只有在自己的回合才能行动'); return; }
+  if(G.tutorial&&!G.tut.tributeShown){
+    G.tut.tributeShown=true;
+    notify('🎓 教程 · 纳贡阶段',
+      `点击「结束出牌」后进入<b>纳贡阶段</b>：选择 1 张手牌放入<b>周天子牌堆</b>底部。<br>
+       · 只要周天子牌堆有牌，每回合都要纳贡（战国时代也一样，克己复礼后亦然）<br>
+       · 请留意对局开始时消息框与左侧日志中其他诸侯的动向<br>
+       · 其他玩家会依次行动，小心他们的攻击！`);
+  }
+  if(G.tutorial&&G.round>=2&&!G.tut.finished){
+    G.tut.finished=true;
+    notify('🎓 教程 · 完成！',
+      `你已经学会了《周之礼》的基本玩法！最后记住<b>三种胜利方式</b>：<br><br>
+       ⚔ <b>战争胜利</b>：消灭所有对手<br>
+       ⚖ <b>商业胜利</b>：手牌布币总值 ≥ 其他所有人城池之和 ×2<br>
+       🏛 <b>宗法胜利</b>：所有其他玩家都成为你的附庸<br><br>
+       💡 城池归零不会被消灭——可以被<b>收纳为附庸</b>或选择<b>诛杀</b>。<br><br>
+       祝你玩的开心，早日问鼎天下！👑`);
+  }
+  if(G.humanPhaseEnd){ const r=G.humanPhaseEnd; G.humanPhaseEnd=null; r(); }
+};
+
+/* ---------------- AI ---------------- */
+function aiPersonality(){ return Math.random(); } // 0攻1商
+async function aiPlayPhase(p){
+  await sleep(700);
+  const pers=p.pers;
+  // 1. 部署
+  for(const [slot,type] of [['minister','臣'],['general','将'],['relic','礼器']]){
+    if(!p.dep[slot]){
+      const c=p.hand.find(x=>x.type===type);
+      if(c){ if(await deployCard(p,c)) await sleep(500); }
+    }
+  }
+  // 2. 布币换牌
+  if(p.hand.length<5 && p.hand.filter(c=>c.name==='布币').length>1){
+    await actExchangeFor(p); await sleep(400);
+  }
+  // 3. 技能牌
+  const sk=p.hand.find(c=>c.type==='技能');
+  if(sk&&Math.random()<0.5){ await playSkill(p,sk); await sleep(500); }
+  // 3.1 事件牌
+  const evc=p.hand.find(c=>c.type==='事件');
+  if(evc&&Math.random()<0.45){ await playEvent(p,evc); await sleep(500); }
+  // 3.2 部署主动技（范蠡等）
+  const mdep=p.dep.minister;
+  if(mdep&&mdep.name==='范蠡'&&!TF.sanjusanUsed&&p.hand.some(c=>c.name==='布币')&&Math.random()<0.7){ await actSanjusan(p); await sleep(400); }
+  if(p.dep.minister&&p.dep.minister.name==='孔子'&&!TF.kongziUsed&&Math.random()<0.5){ await actKongzi(p); await sleep(400); }
+  if(p.dep.minister&&p.dep.minister.name==='张仪'&&!TF.lianhengUsed&&others(p).some(x=>x.dep.minister||x.dep.general)&&Math.random()<0.45){ await actLianheng(p); await sleep(400); }
+  // 3.5 打出臣/将一次性效果
+  const mg=p.hand.find(c=>c.type==='臣'||c.type==='将');
+  if(mg&&Math.random()<0.35){ await playMinisterGeneral(p,mg); await sleep(500); }
+  // 4. 商业型 AI 攒布币
+  const coinN=p.hand.filter(c=>c.name==='布币').length+coinValue(p);
+  const othersCitiesSum=others(p).reduce((s,x)=>s+x.cities,0);
+  const merchantWin = coinN*1>=2*othersCitiesSum;
+  // 5. 攻击
+  const canAtk=p.hand.some(c=>c.name==='戈'||(KING(p).allAsGe&&c.type==='基础'));
+  if(canAtk&&Math.random()<pers.aggr&&!merchantWin){
+    const cands=others(p).filter(t=>canAttackTarget(p,t)&&calcCost(p,t)<=Math.max(countResource(p,'粮草'),countResource(p,'布币')));
+    if(cands.length){
+      const t=cands.sort((a,b)=>b.cities-a.cities)[rnd(Math.min(2,cands.length))];
+      await doAttack(p,t); await sleep(600);
+    }
+  }
+  // 6. 商业 AI 买城（宋国）
+  if(KING(p).buyCity&&p.hand.filter(c=>c.name==='布币').length>=4){
+    const t=others(p).sort((a,b)=>a.cities-b.cities)[0];
+    if(t){ for(let i=0;i<4;i++){const c2=p.hand.find(x=>x.name==='布币'); if(c2){removeFromHand(p,c2);G.discard.push(c2);} }
+      t.cities--; p.cities++; log(`💰 ${p.name} 以4布币强制购买 ${t.name} 1座城！`,'gold');
+      onCitiesChanged(); if(t.cities<=0) await handleDefeat(p,t); }
+  }
+  await sleep(500);
+}
+async function actExchangeFor(p){
+  const k=KING(p);
+  if(k.freeExchange&&!TF.freeExUsed){
+    TF.freeExUsed=true; drawCards(p,1);
+    log(`🪙 ${p.name} 依国策【${k.policy}】免费换牌 1 次。`,'sys'); return;
+  }
+  const coin=p.hand.find(c=>c.name==='布币');
+  if(coin){ removeFromHand(p,coin); G.discard.push(coin); drawCards(p,1);
+    log(`🪙 ${p.name} 弃 1 布币换 1 张牌。`,'sys'); }
+}
+
+/* ---------------- 六艺详解弹窗（点击状态栏「骰：」） ---------------- */
+window.showVassalHand=function(id){ // 宗主查看附庸手牌
+  if(!G) return;
+  const p=P(id);
+  if(!p||!G.me||!isVassalOf(p,G.me)){ toast('只能查看自己附庸的手牌'); return; }
+  uiPickCards(`${p.name} 的手牌（宗主特权）`,`${p.hand.length} 张——宗主可随时查看附庸手牌`,p.hand,{min:0,max:0,allowSkip:true,skipLabel:'✖ 关闭'});
+};
+window.showLiuyi=function(){
+  notify('🎲 君子六艺 · 详解',
+  `<div style="line-height:2">
+   <b>掷骰时机</b>：春秋时代每轮开始由<b>太史</b>代周天子掷骰，效果持续一整轮；战国时代由<b>称帝者</b>掷骰，效果仅称帝者与其附庸享有；<b>克己复礼</b>可额外掷一次（下一轮生效）。<br>
+   <hr style="border:none;border-top:1px solid var(--line);margin:6px 0">
+   <b>1【礼】</b>：城池最多者转移 1 座城给城池最少者；若城池全等，手牌最多者赠 1 张牌给手牌最少者；若完全平等，视为掷出 6【数】。<br>
+   <b>2【乐】</b>：本轮所有玩家额外纳贡 1 张牌至周天子牌堆。<br>
+   <b>3【射】</b>：本轮所有玩家攻击消耗 -1。<br>
+   <b>4【御】</b>：本轮所有玩家攻击消耗 +1。<br>
+   <b>5【书】</b>：立即重掷一次骰子；且本轮所有附庸玩家获得谋反机会。<br>
+   <b>6【数】</b>：本轮所有玩家摸牌阶段多摸 1 张。<br>
+   <hr style="border:none;border-top:1px solid var(--line);margin:6px 0">
+   <span style="color:var(--ink2);font-size:12px">提示：谋反需城池＞2。战国谋反须先向周天子纳贡（非附庸人数）张牌，再掷出 5 方可成功。</span>
+   </div>`);
+};
+
+/* ---------------- 教程模式 ---------------- */
+let tutMode=false;
+function startTutorial(){
+  tutMode=true;
+  selKingdom=KINGDOMS.find(k=>k.id==='秦');
+  selNP=4;
+  startGame();
+}
+function tutNote(title,html){
+  if(!G||!G.tutorial||G.tut.finished) return;
+  notify(title,html,{});
+}
+function tutAdvance(){
+  if(!G||!G.tutorial||G.tut.finished) return;
+  const t=G.tut, me=G.me;
+  if(t.step===0){
+    t.step=1;
+    tutNote('🎓 教程 · 第一步：部署武将',
+      `点击你手牌中的<b>【白起】</b>，选择「<b>📌 部署上场</b>」。<br>
+       白起的部署技【拔城升爵】：以后每令敌方损失 1 座城池，你就从牌堆抽 1 张牌`);
+  }
+  if(t.step===1 && me.dep.general && me.dep.general.name==='白起'){
+    t.step=2;
+    tutNote('🎓 教程 · 第二步：打出技能牌',
+      `依次打出两张技能牌：<br>
+       · <b>【作战速胜】</b>：本回合你的戈命中时额外 +1 城伤害<br>
+       · <b>【始计庙算】</b>：查看一名玩家的全部手牌，并按其中【戈】的数量摸牌（上限3）<br>
+       <span style="color:var(--ink2)">点击手牌中的技能牌 → 「⚡ 打出技能」。</span>`);
+  }
+  if(t.step===2 && t.done['作战速胜'] && t.done['始计庙算']){
+    t.step=3;
+    tutNote('🎓 教程 · 第三步：布币换牌',
+      `点击上方按钮「<b>🪙 布币换牌</b>」：弃置 1 张布币，换 1 张新牌。`);
+  }
+  if(t.step===3 && t.done.exchange){
+    t.step=4;
+    tutNote('🎓 教程 · 第四步：发起攻击',
+      `点击「<b>⚔ 攻击</b>」选择目标发起进攻！<br>
+       · 攻击需打出 1 张【戈】，并支付粮草/布币消耗（距离＝消耗，相邻 1 张）<br>
+       · 秦国国策<b>【耕战】</b>：你的<b>所有基础牌都能当【戈】</b>使用；支付消耗时布币也可替代粮草<br>
+       · 对方没有【盾】的话，会转移 1 座城池给你！`);
+  }
+  if(t.step===4 && t.done.attack){
+    t.step=5;
+    tutNote('🎓 教程 · 第五步：子产·丘赋之制',
+      `打出臣牌<b>【子产】</b>的打出技<b>【丘赋之制】</b>：全场亮出所有【戈】，你按戈的总数摸牌。<br>
+       此时全场共有 <b>4</b> 张【戈】——你可以一次摸 <b>4</b> 张牌！<br>
+       <span style="color:var(--ink2)">摸到牌后，可以继续发起攻击。</span>`);
+  }
+  if(t.step===5 && t.done.qifu){
+    t.step=6;
+    tutNote('🎓 教程 · 第六步：自由行动',
+      `现在你可以继续攻击、换牌或部署。完成出牌后，点击「<b>⏭ 结束出牌 → 纳贡</b>」。`);
+  }
+}
+
+/* ---------------- 开局欢迎弹窗 ---------------- */
+function showWelcome(){
+  showModal(`<h3>🎓 欢迎来到《周之礼》</h3>
+  <div class="mdesc" style="line-height:2.1">
+    你是一方诸侯，目标是争夺天下。<br><br>
+    🎯 <b>三种胜利方式：</b><br>
+    ⚔ 战争：消灭所有对手<br>
+    ⚖ 商业：布币 ≥ 其他人城池之和 ×2<br>
+    🏛 宗法：所有人都是你附庸<br><br>
+    🎮 <b>你的回合只有 4 步：</b><br>
+    摸牌 → 出牌 → 纳贡 → 结束<br><br>
+    🕹 <b>出牌阶段你能：</b><br>
+    ⚔ 攻击 / 🪙 换牌 / 🤝 交易<br><br>
+    💡 第一次玩？选秦国，4 人局——也可以点下方【🎓 教程模式】，手把手教你上手。
+  </div>
+  <div class="mrow"><button class="ok" id="wOk">开始游戏</button></div>`);
+  const ok=$('wOk'); if(ok) ok.onclick=closeModal;
+}
+
+/* ---------------- 胜负判定 ---------------- */
+function checkVictories(){
+  if(G.over) return;
+  const arr=alive();
+  if(arr.length===1){ endGame(arr[0],'战争胜利——消灭了所有对手'); return; }
+  for(const p of arr){
+    // 战争：其他玩家全部出局
+    if(others(p).every(x=>x.out)){ endGame(p,'战争胜利——所有对手已被消灭'); return; }
+    // 宗法：其他玩家皆为附庸
+    const rest=others(p);
+    if(rest.length&&rest.every(x=>isVassalOf(x,p))){
+      if(p.vassalCount>=3||rest.every(x=>isVassalOf(x,p))){ endGame(p,'宗法胜利——普天之下莫非王臣'); return; }
+    }
+    // 商业
+    const val=coinValue(p);
+    const othersCities=others(p).reduce((s,x)=>s+x.cities,0);
+    if(val>=othersCities*2&&othersCities>0&&val>0){ endGame(p,`商业胜利——布币总值 ${val} ≥ 其余城池总和 ${othersCities}×2`); return; }
+  }
+}
+function endGame(winner,reason){
+  if(G.over) return;
+  G.over=true;
+  const box=$('overBox');
+  box.innerHTML=`<h2>${esc(winner.name)} 胜利！</h2>
+    <p style="color:var(--seal2);font-size:18px;margin-bottom:14px">${reason}</p>
+    <p>${esc(winner.kingdom)}国 · 城池 ${winner.cities} · 手牌 ${winner.hand.length} 张</p>
+    <div style="margin-top:10px;font-size:13px;color:var(--ink2)">
+    ${G.players.map(p=>`<div>${p.human?'★ ':''}${esc(p.name)}（${esc(p.kingdom)}）：${p.out?'出局':(p.alive?p.cities+' 城':'出局')}${p.vassalOf!=null?' · 附庸':''}</div>`).join('')}
+    </div>
+    <div style="margin-top:16px;display:flex;gap:12px;justify-content:center">
+      <button class="abtn main" onclick="playAgain()">⚔ 再来一把</button>
+      <button class="abtn" onclick="location.reload()">🏠 返回主菜单</button>
+    </div>`;
+  $('over').style.display='flex';
+  log(`🏆 <b>${winner.name} 达成【${reason.split('——')[0]}】！</b>`,'gold');
+  if(NET.mode==='host') NET.broadcast({t:'over', winner:winner.name, reason,
+    players:G.players.map(p=>({name:p.name,kingdom:p.kingdom,cities:p.cities,alive:!!p.alive,out:!!p.out,vas:p.vassalOf!=null}))});
+}
+window.playAgain=function(){ // 再来一把：沿用本局设置立刻重开
+  closeModal(); _q.length=0; _qBusy=false;
+  $('over').style.display='none';
+  tutMode=false;
+  startGame();
+};
+
+/* ---------------- 规则速览 ---------------- */
+window.showRules=function(page){
+  const PAGES=['基本规则','君子六艺','诸侯国策','臣将图鉴','技能·礼器','事件牌'];
+  if(!page||!PAGES.includes(page)) page='基本规则';
+  const liuyi=`<b>掷骰时机</b>：春秋每轮由太史代周天子掷骰；战国由称帝者掷骰（仅其与附庸享有）；克己复礼可额外掷一次（于下一轮开始生效，并持续到各自下个回合结束）。点击状态栏「骰：」可随时查看。<br>
+    · <b>1【礼】</b>：城池最多者转移1城给城池最少者；城池全等则手牌最多者赠1张给最少者；完全平等视为掷出6【数】。<br>
+    · <b>2【乐】</b>：本轮所有玩家额外纳贡1张牌至周天子牌堆。<br>
+    · <b>3【射】</b>：本轮所有玩家攻击消耗-1。<br>
+    · <b>4【御】</b>：本轮所有玩家攻击消耗+1。<br>
+    · <b>5【书】</b>：立即重掷一次骰子；且本轮所有附庸玩家获得谋反机会。<br>
+    · <b>6【数】</b>：本轮所有玩家摸牌阶段多摸1张。<br>
+    <span style="color:var(--ink2)">谋反需城池＞2。战国谋反须先向周天子纳贡（非附庸人数）张牌，再掷出5方可成功。晋侯的附庸可随时谋反。</span>`;
+  const basic=`
+  <b>回合四阶段</b>：摸牌（优先取自周天子牌堆3张）→ 出牌 → 纳贡（只要周天子牌堆有牌就纳贡1张入牌堆底，战国与克己复礼后亦然；持【王子午鼎】者免纳贡）→ 结束（手牌超上限可一次多选弃置）。<br>
+  <b>牌堆规则</b>：开局<b>所有牌都在周天子牌堆</b>；抽空即进入战国，摸牌改自普通牌堆；天子牌堆再有牌时摸牌与纳贡恢复从天子牌堆进行。<b>弃牌堆只保留最近10张</b>，较早的打乱并入普通牌堆。<br>
+  <b>攻击</b>：打出【戈】并支付粮草/布币（距离＝消耗，相邻1、间隔+1）。<b>可一次打出多张【戈】——每多打出 1 张，本次城池伤害 +1；但对方只需打出 1 张【盾】即可把本次攻击全部抵消。</b>无盾则转移 1 座城池给攻击方。<br>
+  <b>买路</b>：距离≥2 时可向路径上的中间玩家支付 1 张资源借道（持【杜虎符】者所需资源 -1 即免费；路过自己的附庸免收过路费）。<br>
+  <b>附庸</b>：除谋反与【礼崩乐坏】外不得攻击宗主；宗主被攻击时其手中有盾<b>必须强制打出护主</b>；<b>附庸被攻击时，宗主可选择是否出盾相助</b>；宗主可随时查看附庸手牌（对手面板「👁 查看手牌」）。<br>
+  <b>部署</b>：臣/将/礼器各限1张部署场上。主动技能（苏秦【悬梁刺股】、张仪【连横夺相】、范蠡【三聚三散】、孔子【复礼宗风】）在「已部署」区显示按钮。<br>
+  <b>回合限制</b>：只有自己的回合才能主动出牌；非自己回合只能被动响应（防御、护卫、纳贡等）。<br>
+  <b>交易</b>：付出的牌进入对方手牌；布币可买手牌、部署牌、城池。商鞅【垦草令】在场或你执秦国时禁止交易。<br>
+  <b>事件牌时效</b>：事件牌打出后<b>立即生效并停留在桌面</b>，对每名玩家持续到<b>其下个回合结束</b>为止（每人各享有一整个回合的窗口）；全员窗口结束后牌回到弃牌堆。<br>
+  <b>战国时代</b>：天子牌堆抽空触发——取消每轮掷骰与纳贡环节；称帝者独占掷骰（效果由其与附庸共享）。<br>
+  <b>称帝</b>：势力城池（含附庸）≥全场半数（【九鼎】减半）；悬停【称帝】按钮可见还差多少。称帝后可铸造【传国玉玺】。<br>
+  <b>模式</b>：默认 <b>4 人局</b>（规则支持 4–10 人）；⚡ 极速模式为 3 人局、初始 5 城 5 张手牌。<br>
+  <span style="color:var(--ink2)">※ 界面上所有【卡牌名】与国号都可鼠标悬停查看效果。</span>`;
+  const kl=KINGDOMS.map(k=>`<div style="margin:4px 0;padding:6px 10px;background:var(--card);border:1px solid var(--line);border-radius:6px">
+    <b>${k.id}国</b>（${esc(k.ruler)}） · <span style="color:var(--seal2)">${k.policy}</span><br>
+    <span>${k.desc}</span><br>
+    <span style="color:var(--ink2);font-size:12px">典故：${esc(k.src||'')}</span></div>`).join('');
+  const mg=Object.entries(MINISTERS).map(([k,v])=>`<div style="margin:4px 0;padding:6px 10px;background:#e9f0fa;border:1px solid #b9c8e4;border-radius:6px">
+    <b>【${k}】文臣</b><br>📌 部署——${esc(v.deploy)}<br>⚡ 打出——${esc(v.play)}</div>`).join('')
+    +Object.entries(GENERALS).map(([k,v])=>`<div style="margin:4px 0;padding:6px 10px;background:#faeaea;border:1px solid #e0b9b9;border-radius:6px">
+    <b>【${k}】武将</b><br>📌 部署——${esc(v.deploy)}<br>⚡ 打出——${esc(v.play)}</div>`).join('');
+  const sr=Object.entries(SKILLS).map(([k,v])=>`<div style="margin:3px 0"><b>${k}</b>：${esc(v)}</div>`).join('');
+  const RELIC_PREF='上古礼器 · 价值2布币（支付过路费时仅等价1布币）。';
+  const rl=Object.entries(RELICS).map(([k,v])=>`<div style="margin:4px 0;padding:6px 10px;background:#fdf6e0;border:1px solid #e0cf9a;border-radius:6px"><b>${k}</b>：${esc(v.replace(RELIC_PREF,''))}</div>`).join('')
+    +`<div style="margin-top:6px;color:var(--ink2);font-size:12px">※ 【传国玉玺】不在牌堆中，只能由称帝者以【和氏璧】+任意其他礼器铸造获得；铸造后两张原牌被彻底摧毁，永不再回任何牌堆。</div>`;
+  const ev=Object.entries(EVENTS).map(([k,v])=>`<div style="margin:4px 0;padding:6px 10px;background:#fbe9e0;border:1px solid #e0b9a0;border-radius:6px"><b>${k}</b>：${esc(v.replace(/^事件 · /,''))}</div>`).join('')
+    +`<div style="margin-top:6px;color:var(--ink2);font-size:12px">※ 需要持续生效的事件牌打出后<b>停留在桌面</b>（左侧牌堆区可见「已结束 x/y」进度），对每名玩家持续到其下个回合结束；全员窗口结束后才回到弃牌堆。</div>`;
+  const content={ '基本规则':basic, '君子六艺':liuyi, '诸侯国策':kl, '臣将图鉴':mg, '技能·礼器':sr+'<hr style="border:none;border-top:1px solid var(--line);margin:8px 0">'+rl, '事件牌':ev }[page];
+  _qPush(done=>{
+    showModal(`<h3>📖 规则速览</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        ${PAGES.map(p=>`<button class="abtn ${p===page?'main':''}" data-p="${p}" style="font-size:12px;padding:4px 10px">${p}</button>`).join('')}
+      </div>
+      <div class="mdesc" style="font-size:13px;line-height:1.9">${content}</div>
+      <div class="mrow"><button class="ok" id="rlOk">关 闭</button></div>`);
+    $('modal').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{ done(); closeModal(); showRules(b.dataset.p); });
+    $('rlOk').onclick=()=>{ done(); closeModal(); };
+  });
+};
+
+/* =====================================================================
+   P2P 联机（WebRTC DataChannel）
+   ─ 房主（host）浏览器运行全部游戏逻辑；加入者（guest）只做 UI，操作回传房主执行
+   ─ signal-server.js 仅在建连前转发 SDP / ICE，DataChannel 打通后不再参与游戏数据
+   ─ 信息隐藏：下发局面时，每个加入者只能拿到自己的手牌，其他人只发张数
+   ===================================================================== */
+   const RTC_CFG={
+  iceServers:[
+    { urls:'stun:stun.qq.com:3478' },
+    { urls:'stun:stun.miwifi.com:3478' },
+    { urls:'stun:stun.chat.bilibili.com:3478' },
+    { urls:'stun:stun.l.google.com:19302' },
+    { urls:'turn:relay1.expressturn.com:3478',
+      username:'efKTRQ1CLQKQK6TQ', credential:'A1b2C3d4E5f6G7h8' },
+    { urls:'turn:relay1.expressturn.com:3478?transport=tcp',
+      username:'efKTRQ1CLQKQK6TQ', credential:'A1b2C3d4E5f6G7h8' }
+  ]
+};
+
+const NET={
+  mode:'off',                 // 'off' | 'host' | 'guest'
+  room:'zzl', id:'', name:'', seatId:null, pid:null, signal:'',
+  peers:new Map(),            // host: seat -> {seat,gid,pid,pc,dc,open,name}
+  dc:null, pc:null, lobby:[],
+  actor:null,                 // 当前正在等待其决策的玩家
+  askId:1, pending:new Map(), seq:0, _st:null,
+
+  online(){ return this.mode!=='off'; },
+  rtcOK(){ return typeof RTCPeerConnection!=='undefined'; },
+
+  /* ---------- 信令（只用于交换 SDP/ICE） ---------- */
+  async sigPost(p,b){
+    const r=await fetch(this.signal+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+    return r.json();
+  },
+  async sigPoll(){
+    const r=await fetch(this.signal+'/api/poll?room='+encodeURIComponent(this.room)+'&id='+encodeURIComponent(this.id));
+    return (await r.json()).msgs||[];
+  },
+  async sigLoop(){
+    while(this.online()){
+      try{ for(const m of await this.sigPoll()) this.onSignal(m); }
+      catch(e){ await sleep(300); }
+    }
+  },
+  async sigSend(msg,to){ try{ await this.sigPost('/api/send',{room:this.room,id:this.id,to:to||null,msg}); }catch(e){} },
+
+  /* ---------- 数据通道 ---------- */
+  sendTo(seat,obj){ const r=this.peers.get(seat); if(r&&r.dc&&r.dc.readyState==='open'){ try{ r.dc.send(JSON.stringify(obj)); }catch(e){} } },
+  send(obj){ if(this.dc&&this.dc.readyState==='open'){ try{ this.dc.send(JSON.stringify(obj)); }catch(e){} } },
+  broadcast(obj){ if(this.mode!=='host') return; for(const seat of this.peers.keys()) this.sendTo(seat,obj); },
+
+  /* ---------- 房主：创建房间 ---------- */
+  async hostStart(room,name,signal){
+    if(!this.rtcOK()){ netTip('当前页面不是安全上下文（需 https:// 或 http://localhost），浏览器未提供 WebRTC。'); return false; }
+    this.mode='host'; this.room=room||'zzl'; this.id='host'; this.name=name||'房主';
+    this.signal=signal; this.peers=new Map(); this.seq=0; this.actor=null;
+    try{ await this.sigPost('/api/hello',{room:this.room,id:this.id,name:this.name}); }
+    catch(e){ netTip('无法连接信令服务器：'+this.signal+'　（房主需要先运行 node signal-server.js）'); this.mode='off'; return false; }
+    this.sigLoop(); netLobby(); return true;
+  },
+  hostPeer(gid,gname){                          // 有新加入者：房主主动发起 offer
+    const seat=++this.seq;
+    let pc,dc;
+    try{ pc=new RTCPeerConnection(RTC_CFG); dc=pc.createDataChannel('zhou'); }
+    catch(e){ return; }
+    const rec={seat,gid,pid:null,pc,dc,open:false,name:gname||('玩家'+(seat+1))};
+    this.peers.set(seat,rec);
+    dc.onopen=()=>{ rec.open=true; this.sendTo(seat,{t:'welcome',seat}); netLobby(); };
+    dc.onclose=()=>{ rec.open=false; this.failPending(seat); netLobby(); };
+    dc.onmessage=ev=>{ let m; try{ m=JSON.parse(ev.data); }catch(e){ return; } hostMsg(seat,m); };
+    pc.onicecandidate=e=>{ if(e.candidate) this.sigSend({k:'ice',c:e.candidate,from:this.id},gid); };
+    pc.createOffer().then(o=>pc.setLocalDescription(o))
+      .then(()=>this.sigSend({k:'offer',sdp:pc.localDescription,from:this.id},gid));
+  },
+
+  /* ---------- 加入者：加入房间 ---------- */
+  async join(room,name,signal){
+    if(!this.rtcOK()){ netTip('当前页面不是安全上下文（需 https:// 或 http://localhost），浏览器未提供 WebRTC。'); return false; }
+    this.mode='guest'; this.room=room||'zzl'; this.id='g'+Math.random().toString(36).slice(2,9);
+    this.name=name||'玩家'; this.signal=signal; this.seatId=null; this.lobby=[];
+    try{ await this.sigPost('/api/hello',{room:this.room,id:this.id,name:this.name}); }
+    catch(e){ netTip('无法连接信令服务器：'+this.signal+'　（确认房主已启动，且地址端口正确）'); this.mode='off'; return false; }
+    this.sigLoop(); netLobby(); return true;
+  },
+  guestAnswer(o){
+    let pc; try{ pc=new RTCPeerConnection(RTC_CFG); }catch(e){ return; }
+    this.pc=pc;
+    pc.ondatachannel=ev=>{
+      const dc=ev.channel; this.dc=dc;
+      dc.onopen=()=>{ this.send({t:'hi',name:this.name}); netLobby(); };
+      dc.onclose=()=>{ netLobby(); toast('⚠️ 与房主的连接已断开'); };
+      dc.onmessage=e=>{ let m; try{ m=JSON.parse(e.data); }catch(err){ return; } guestMsg(m); };
+    };
+    pc.onicecandidate=e=>{ if(e.candidate) this.sigSend({k:'ice',c:e.candidate,from:this.id},'host'); };
+    pc.setRemoteDescription(o.sdp).then(()=>pc.createAnswer()).then(a=>pc.setLocalDescription(a))
+      .then(()=>this.sigSend({k:'answer',sdp:pc.localDescription,from:this.id},'host'));
+  },
+
+  onSignal(m){
+    if(m.type==='peer-join'){ if(m.id!==this.id&&this.mode==='host') this.hostPeer(m.id,m.name); return; }
+    if(m.k==='offer'  && this.mode==='guest') this.guestAnswer(m);
+    if(m.k==='answer' && this.mode==='host'){ const r=[...this.peers.values()].find(x=>x.gid===m.from); if(r) r.pc.setRemoteDescription(m.sdp); }
+    if(m.k==='ice'){
+      const pc = this.mode==='host' ? ([...this.peers.values()].find(x=>x.gid===m.from)||{}).pc : this.pc;
+      if(pc) pc.addIceCandidate(m.c).catch(()=>{});
+    }
+  },
+
+  /* 断线时把挂起的提问直接作废，避免主循环永久卡住 */
+  failPending(seat){
+    for(const [id,q] of [...this.pending]) if(q.seat===seat){ this.pending.delete(id); q.res(null); }
+  },
+};
+
+/* ---------- 决策归属：当前该由哪位玩家作答 ---------- */
+function actorP(){ return NET.actor || (G && G.me) || null; }
+function isRemote(p){ return !!(p && p.netSeat!=null); }
+async function asActor(p,fn){                 // 只切换"被询问的玩家"
+  const o=NET.actor; NET.actor=p||o;
+  try{ return await fn(); } finally { NET.actor=o; }
+}
+async function asPlayer(p,fn){                // 代打：连 G.me 一起切换，用于执行加入者的动作
+  if(!NET.online()) return await fn();
+  const om=G&&G.me, oa=NET.actor;
+  if(G) G.me=p; NET.actor=p;
+  try{ return await fn(); } finally { if(G) G.me=om; NET.actor=oa; }
+}
+
+/* ---------- 房主 → 加入者：提问 ---------- */
+function netAsk(seat,payload){
+  const rec=NET.peers.get(seat);
+  if(!rec||!rec.dc||rec.dc.readyState!=='open') return Promise.resolve(null);
+  const id=NET.askId++;
+  return new Promise(res=>{ NET.pending.set(id,{seat,res}); NET.sendTo(seat,Object.assign({t:'ask',id},payload)); });
+}
+
+/* ---------- 房主：生成某位加入者可见的局面（他人手牌只给张数） ---------- */
+function netSnapFor(pid){
+  if(!G||!G.players) return null;
+  const me=P(pid); if(!me) return null;
+  const pub=!!tableFx('流言四起');
+  const C=c=>({uid:c.uid,name:c.name,type:c.type});
+  const D=c=>c?C(c):null;
+  const handOf=p=>{
+    if(p===me||pub||isVassalOf(p,me)) return p.hand.map(C);       // 自己／公开／自己的附庸：发真实牌
+    return p.hand.map(()=>({uid:-1,name:'🂠',type:'?'}));          // 其他人：只发张数
+  };
+  return {
+    era:G.era, round:G.round, dice:G.dice, taishi:G.taishi, cur:G.players.indexOf(G.curP),
+    emperorId:G.emperorId, over:!!G.over, turnSeq:G.turnSeq||0, rebelWindow:!!(RF&&RF.rebelWindow),
+    tzN:G.tianzi.length, noN:G.normal.length, diN:G.discard.length,
+    table:(G.table||[]).map(t=>({name:t.name,consumed:t.consumed||{},bornAt:t.bornAt||0})),
+    plague:G.plague?{holder:G.plague.holder,left:G.plague.left}:null,
+    players:G.players.map(p=>({id:p.id,name:p.name,kingdom:p.kingdom,cities:p.cities,alive:!!p.alive,out:!!p.out,
+      emperor:!!p.emperor,vassalOf:p.vassalOf==null?null:p.vassalOf,plague:!!p.plague,ruined:!!p.ruined,
+      hand:handOf(p),dep:{minister:D(p.dep.minister),general:D(p.dep.general),relic:D(p.dep.relic)}})),
+    actions:(!G.over&&G.curP&&G.curP.id===pid)?netActions(pid):[]
+  };
+}
+function netActions(pid){                     // 以该玩家的身份算一次按钮可用性
+  const p=P(pid); if(!p||!G) return [];
+  const om=G.me, oa=NET.actor; G.me=p; NET.actor=p;
+  let list=[]; try{ list=buildActions(); }catch(e){ list=[]; }
+  G.me=om; NET.actor=oa; return list;
+}
+function netPush(){                           // 局面变化后推送（合并 30ms 内的多次渲染）
+  if(NET.mode!=='host'||!G) return;
+  clearTimeout(NET._st);
+  NET._st=setTimeout(()=>{
+    for(const r of NET.peers.values())
+      if(r.dc&&r.dc.readyState==='open'&&r.pid!=null)
+        NET.sendTo(r.seat,{t:'state',s:netSnapFor(r.pid)});
+  },30);
+}
+
+/* ---------- 房主：收到加入者的消息 ---------- */
+function hostMsg(seat,m){
+  if(m.t==='hi'){
+    const r=NET.peers.get(seat); if(r){ r.name=m.name||r.name; r.open=true; }
+    const p=(G&&G.players)?G.players.find(x=>x.netSeat===seat):null; if(p&&r) p.name=r.name;
+    netLobby(); return;
+  }
+  if(m.t==='ans'){ const q=NET.pending.get(m.id); if(q){ NET.pending.delete(m.id); q.res(m.value); } return; }
+  if(m.t==='act'){ netAction(seat,m.key); return; }
+}
+const NET_ACT={actAttack:()=>window.actAttack(), actEnd:()=>window.actEnd(),
+  actTrade:()=>actTrade(), actExchange:()=>actExchange(), actVassalAid:()=>actVassalAid(),
+  actRebel:()=>actRebel(), actEmperor:()=>actEmperor(), actKeji:()=>actKeji(),
+  actAttackPile:()=>actAttackPile(), actBuyCity:()=>window.actBuyCity(),
+  actBuyDeployed:()=>window.actBuyDeployed(), actSecondAttack:()=>window.actSecondAttack(),
+  actForgeSeal:()=>window.actForgeSeal()};
+async function netAction(seat,key){
+  const r=NET.peers.get(seat); if(!r||!G) return;
+  const p=P(r.pid); if(!p) return;
+  try{
+    await asPlayer(p,async()=>{
+      if(key.indexOf('card:')===0){ const c=p.hand.find(x=>x.uid===+key.slice(5)); if(c) await cardMenu(c); return; }
+      if(key.indexOf('skill:')===0){ await window.actDeploySkill(key.slice(6)); return; }
+      const f=NET_ACT[key]; if(f) await f();
+    });
+  }catch(e){ console.error(e); }
+  netPush(); render();
+}
+
+/* ---------- 加入者：收到房主的消息 ---------- */
+function guestMsg(m){
+  if(m.t==='welcome'){ NET.seatId=m.seat; netLobby(); return; }
+  if(m.t==='lobby'){ NET.lobby=m.list||[]; netLobby(); return; }
+  if(m.t==='start'){ netStartGame(m); return; }
+  if(m.t==='state'){ netApply(m.s); render(); return; }
+  if(m.t==='ask'){ netAnswer(m); return; }
+  if(m.t==='notify'){ notify(m.title,m.html,{auto:!!m.auto}); return; }
+  if(m.t==='toast'){ toast(m.msg); return; }
+  if(m.t==='log'){ log(m.html,m.cls||''); return; }
+  if(m.t==='over'){ netShowOver(m); return; }
+}
+/* 加入者：把房主下发的局面还原成一个"影子 G"，从而复用原有的渲染逻辑 */
+function netApply(s){
+  if(!s) return;
+  const mk=n=>Array.from({length:Math.max(0,n|0)},()=>({uid:-1,name:'?',type:'?'}));
+  const C=c=>c?{uid:c.uid,name:c.name,type:c.type}:null;
+  G=G||{};
+  G.era=s.era; G.round=s.round; G.dice=s.dice; G.taishi=s.taishi; G.cur=s.cur;
+  G.emperorId=s.emperorId; G.over=!!s.over; G.turnSeq=s.turnSeq||0;
+  G.tianzi=mk(s.tzN); G.normal=mk(s.noN); G.discard=mk(s.diN);
+  G.table=(s.table||[]).map(t=>({name:t.name,consumed:t.consumed||{},bornAt:t.bornAt||0,card:{uid:-1,name:t.name,type:'事件'}}));
+  G.plague=s.plague||null;
+  G.players=(s.players||[]).map(p=>({id:p.id,name:p.name,kingdom:p.kingdom,cities:p.cities,
+    alive:!!p.alive,out:!!p.out,emperor:!!p.emperor,vassalOf:p.vassalOf==null?null:p.vassalOf,
+    plague:!!p.plague,ruined:!!p.ruined,human:true,netSeat:null,
+    hand:(p.hand||[]).map(c=>({uid:c.uid,name:c.name,type:c.type})),
+    dep:{minister:C(p.dep&&p.dep.minister),general:C(p.dep&&p.dep.general),relic:C(p.dep&&p.dep.relic)},
+    pers:null,playedTwice:{},relicRefused:false,skipNextPlay:false,nextExtraDraw:0,rebornUsed:false,rebornPenalty:0}));
+  G.me=G.players.find(p=>p.id===NET.pid)||G.players[0]||null;
+  G.curP=G.players[s.cur]||null;
+  G.actions=s.actions||[];
+  TF=newTurnFlags(); RF={rebelWindow:!!s.rebelWindow};
+}
+function netStartGame(m){
+  NET.seatId=m.seat; NET.pid=m.pid;
+  netApply(m.s);
+  $('setup').style.display='none'; $('game').style.display='block';
+  $('logBox').innerHTML=''; $('over').style.display='none';
+  cardMenu    = c => netAct('card:'+c.uid);              // 加入者：所有操作回传房主执行
+  window.actDeploySkill = name => netAct('skill:'+name);
+  render();
+}
+window.netAct=function(key){ NET.send({t:'act',key}); };
+async function netAnswer(m){
+  let v=null;
+  if(m.kind==='choice'){
+    const opts=m.options.map((o,i)=>({label:o.label,sub:o.sub,value:i}));
+    const av=(m.autoValue==null||m.autoValue<0)?null:m.autoValue;
+    v=await uiChoice(m.title,m.desc,opts,{allowClose:m.allowClose,closeLabel:m.closeLabel,
+      autoSec:m.autoSec||0,autoValue:av,autoLabel:m.autoLabel||''});
+  }else if(m.kind==='cards'){
+    const cards=m.cards.map(c=>({uid:c.uid,name:c.name,type:c.type}));
+    const sel=await uiPickCards(m.title,m.desc,cards,{min:m.min,max:m.max,allowSkip:m.allowSkip,skipLabel:m.skipLabel,okLabel:m.okLabel});
+    v = sel ? sel.map(c=>c.uid) : null;
+  }else if(m.kind==='player'){
+    const cands=m.cands.map(c=>({id:c.id,name:c.name,kingdom:c.kingdom,cities:c.cities,
+      hand:new Array(c.hand|0),vassalOf:c.vas?c.id:null,emperor:!!c.emp,_x:c.extra||''}));
+    const sel=await uiPickPlayer(m.title,m.desc,cands,{allowSkip:m.allowSkip,skipLabel:m.skipLabel,info:p=>p._x});
+    v = sel ? sel.id : null;
+  }
+  NET.send({t:'ans',id:m.id,value:v});
+}
+function netShowOver(m){
+  if(G) G.over=true;
+  $('overBox').innerHTML=`<h2>${esc(m.winner)} 胜利！</h2>
+    <p style="color:var(--seal2);font-size:18px;margin-bottom:14px">${esc(m.reason)}</p>
+    <div style="margin-top:10px;font-size:13px;color:var(--ink2)">
+    ${(m.players||[]).map(p=>`<div>${esc(p.name)}（${esc(p.kingdom)}）：${p.out?'出局':(p.alive?p.cities+' 城':'出局')}${p.vas?' · 附庸':''}</div>`).join('')}
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--ink2)">等待房主重开，或刷新页面</div>`;
+  $('over').style.display='flex';
+}
+
+/* ---------- 联机大厅界面 ---------- */
+function netTip(msg){ const t=$('netTip'); if(t) t.innerHTML=msg; }
+function netLobby(){
+  const box=$('netRoomBox'), set=$('netSetup');
+  if(!box||!set) return;
+  if(NET.mode==='off'){ box.style.display='none'; set.style.display='block'; return; }
+  set.style.display='none'; box.style.display='block';
+  if(NET.mode==='host'){
+    const peers=[...NET.peers.values()];
+    $('netWho').innerHTML=`你是 <b>房主</b>（${esc(NET.name)}）· 房间号 <b>${esc(NET.room)}</b> · 信令：${esc(NET.signal)}`;
+    $('netList').innerHTML = peers.length
+      ? peers.map(r=>`<span class="netseat">${r.open?'✅':'⏳'} ${esc(r.name)}</span>`).join('')
+      : '<span style="color:var(--ink2)">还没有人加入……把「信令：」后面的地址（即 signal-server.js 打印的局域网地址）发给朋友，让他们点「🚪 加入房间」。</span>';
+    const ready=peers.length?peers.every(r=>r.open):false;
+    $('netStartBtn').disabled = peers.length ? !ready : false;
+    $('netStartBtn').textContent = peers.length ? `逐 鹿 中 原（${1+peers.length} 人联机）` : '逐 鹿 中 原（暂无加入者）';
+    $('netHostAct').style.display='block';
+    NET.broadcast({t:'lobby',list:peers.map(r=>({name:r.name,open:r.open}))});
+  }else{
+    $('netWho').innerHTML=`房间 <b>${esc(NET.room)}</b> · 你是 <b>${esc(NET.name)}</b> · 信令：${esc(NET.signal)}`;
+    $('netList').innerHTML = (NET.dc&&NET.dc.readyState==='open')
+      ? (NET.seatId!=null ? `✅ 已与房主建立 <b>P2P 直连</b>（座位 ${NET.seatId+1}）<br>等待房主开始对局……`
+                          : '✅ 已连接，等待房主分配座位……')
+      : '⏳ 正在与房主建立 P2P 连接（交换 SDP / ICE）……';
+    $('netHostAct').style.display='none';
+  }
+}
+
+/* ---------------- 开局 ---------------- */
+let selKingdom=null, selNP=4, speedMode=false;
+function initSetup(){
+  const kdList=$('kdList');
+  kdList.innerHTML=KINGDOMS.map((k,i)=>`<button class="kbtn" data-i="${i}" title="${esc(k.desc)}">${k.id}国<small style="display:block;font-size:10px;color:var(--gold)">${esc(k.policy)}</small></button>`).join('');
+  const showK=k=>{ $('kdDesc').innerHTML=`【${k.id}国 · 国策：<b style="color:var(--seal2)">${esc(k.policy)}</b>】${esc(k.desc)}<br><span style="color:var(--ink2);font-size:12px">典故：${esc(k.src)}</span>`; };
+  kdList.querySelectorAll('.kbtn').forEach(b=>b.onclick=()=>{
+    kdList.querySelectorAll('.kbtn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); selKingdom=KINGDOMS[+b.dataset.i]; showK(selKingdom);
+  });
+  kdList.children[1].classList.add('sel'); selKingdom=KINGDOMS[1]; // 默认秦国
+  showK(selKingdom);
+  const npb=$('npBtns');
+  npb.innerHTML=[4,5,6,7,8,9,10].map(n=>`<button class="npbtn" data-n="${n}">${n}</button>`).join(' ');
+  npb.querySelectorAll('.npbtn').forEach(b=>b.onclick=()=>{
+    npb.querySelectorAll('.npbtn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); selNP=+b.dataset.n;
+  });
+  npb.children[0].classList.add('sel');   // 默认 4 人局
+  $('startBtn').onclick=()=>{ tutMode=false; speedMode=false; startGame(); };
+  $('tutBtn').onclick=startTutorial;
+  $('speedBtn').onclick=()=>{ tutMode=false; speedMode=true; selNP=3; startGame(); };
+  $('randBtn').onclick=()=>{
+    tutMode=false; speedMode=false;
+    selKingdom=KINGDOMS[rnd(KINGDOMS.length)];   // 由系统随机选择国家
+    kdList.querySelectorAll('.kbtn').forEach(x=>x.classList.remove('sel'));
+    const bi=KINGDOMS.indexOf(selKingdom); const bb=kdList.querySelector(`.kbtn[data-i="${bi}"]`);
+    if(bb) bb.classList.add('sel'); showK(selKingdom);
+    toast(`🎲 天命所归——你执掌【${selKingdom.id}国】！`);
+    setTimeout(startGame,600);
+  };
+  // ---- 联机（P2P）----
+  const sigDefault=(location.protocol==='http:'||location.protocol==='https:')?location.origin:'http://localhost:8787';
+  const sigEl=$('netSignal'); if(sigEl) sigEl.value=sigDefault;
+  if(!NET.rtcOK())
+    netTip('⚠️ 当前页面不是安全上下文：WebRTC 不可用。请通过 <b>https://</b> 或 <b>http://localhost</b> 打开本页（见 signal-server.js 顶部说明）。');
+  $('netHostBtn').onclick=async ()=>{
+    $('netHostBtn').disabled=true;
+    await NET.hostStart(($('netRoom').value||'zzl').trim(), ($('netName').value||'房主').trim(), (sigEl.value||sigDefault).trim());
+    $('netHostBtn').disabled=false;
+  };
+  $('netJoinBtn').onclick=async ()=>{
+    $('netJoinBtn').disabled=true;
+    await NET.join(($('netRoom').value||'zzl').trim(), ($('netName').value||'玩家').trim(), (sigEl.value||sigDefault).trim());
+    $('netJoinBtn').disabled=false;
+  };
+  $('netStartBtn').onclick=()=>{ tutMode=false; speedMode=false; startGame(); };
+  $('netCancelBtn').onclick=()=>location.reload();
+  netLobby();
+  showWelcome();
+}
+function startGame(){
+  G={
+    players:[], tianzi:[], normal:[], discard:[], table:[],
+    era:'spring', round:1, taishi:0, dice:null, cur:0, over:false, curP:null, turnSeq:0,
+    emperorId:null, me:null, humanPhaseEnd:null, lastSkill:null, pileHits:0,
+    pendingLiuyi:null, plague:null,
+  };
+  const startCities = speedMode?5:10;
+  const startHand = speedMode?5:4;
+  // 联机：已连上的加入者各占一个座位（房主坐 0 号），其余由 AI 补齐
+  const guests = (NET.mode==='host')
+    ? [...NET.peers.values()].filter(r=>r.dc&&r.dc.readyState==='open').sort((a,b)=>a.seat-b.seat) : [];
+  selNP = Math.max(selNP, 1+guests.length);
+  const meName = NET.mode==='host' ? (NET.name||'房主') : '你';
+  const me={id:0,name:meName,human:true,netSeat:null,kingdom:selKingdom.id,cities:startCities,hand:[],dep:{minister:null,general:null,relic:null},vassalOf:null,alive:true,out:false,emperor:false,pers:null,playedTwice:{},relicRefused:false,skipNextPlay:false,nextExtraDraw:0,ruined:false,rebornUsed:false,rebornPenalty:0,plague:false};
+  G.players.push(me); G.me=me;
+  const kds=shuffle([...KINGDOMS]).filter(k=>k.id!==selKingdom.id);
+  let ki=0;
+  for(const r of guests){                    // 加入者（真人，UI 在各自的浏览器上）
+    const k=kds[ki++%kds.length];
+    r.pid=G.players.length;
+    G.players.push({id:G.players.length,name:r.name,human:true,netSeat:r.seat,kingdom:k.id,cities:startCities,hand:[],dep:{minister:null,general:null,relic:null},vassalOf:null,alive:true,out:false,emperor:false,
+      pers:null,playedTwice:{},relicRefused:false,skipNextPlay:false,nextExtraDraw:0,ruined:false,rebornUsed:false,rebornPenalty:0,plague:false});
+  }
+  for(let i=G.players.length;i<selNP;i++){   // AI 诸侯
+    const k=kds[ki++%kds.length];
+    G.players.push({id:i,name:k.ruler,human:false,netSeat:null,kingdom:k.id,cities:startCities,hand:[],dep:{minister:null,general:null,relic:null},vassalOf:null,alive:true,out:false,emperor:false,
+      pers:{aggr:0.25+Math.random()*0.55},playedTwice:{},relicRefused:false,skipNextPlay:false,nextExtraDraw:0,ruined:false,rebornUsed:false,rebornPenalty:0,plague:false});
+  }
+  buildPiles(selNP);
+  $('logBox').innerHTML='';   // 再来一把时清空日志
+  // 初始手牌
+  G.players.forEach(p=>drawCards(p,startHand));
+  // 教程模式：四人局 · 玩家为秦国，固定起手牌
+  if(tutMode){
+    G.tutorial=true;
+    G.tut={step:0,done:{},finished:false,tributeShown:false,liuyiShown:false};
+    const give=a=>a.map(([n,t])=>makeCard(n,t));
+    G.me.hand=give([['白起','将'],['戈','基础'],['粮草','基础'],['布币','基础'],
+                    ['作战速胜','技能'],['始计庙算','技能'],['子产','臣']]);
+    G.players[1].hand=give([['戈','基础'],['布币','基础'],['布币','基础']]);
+    G.players[2].hand=give([['戈','基础'],['盾','基础'],['布币','基础']]);
+    G.players[3].hand=give([['戈','基础'],['盾','基础'],['盾','基础']]);
+    log('🎓 教程模式开始：你执掌<b>秦国</b>，跟随弹窗提示一步步学习。','gold');
+  }
+  log(`🏛 对局开始：${selNP} 位诸侯，每人${speedMode?'5':'10'}城${speedMode?'（⚡ 极速模式：起手 5 张手牌）':''}。首轮由 <b>${G.players[0].name}</b> 代周天子掷骰。`,'gold');
+  $('setup').style.display='none'; $('game').style.display='block';
+  render();
+  // 联机：把各自视角的初始局面（他人手牌已隐藏）下发给加入者，随后开始
+  if(NET.mode==='host'){
+    for(const r of NET.peers.values())
+      if(r.dc&&r.dc.readyState==='open')
+        NET.sendTo(r.seat,{t:'start', seat:r.seat, pid:r.pid, s:netSnapFor(r.pid)});
+  }
+  if(typeof __NO_MAIN_LOOP!=='undefined' && __NO_MAIN_LOOP) return;   // 测试用：不启动主循环
+  mainLoop();
+}
+async function mainLoop(){
+  while(!G.over){
+    // 轮开始：六艺
+    RF={rebelWindow:false, drawExtra:0, tributeExtra:0};
+    TF=newTurnFlags();
+    // 【军形先胜】护盾一直有效，直到被消耗——不再随轮次清空
+    // 瘟疫：每轮往下家传递，传满一整圈后消失
+    if(G.plague){
+      const cur=P(G.plague.holder);
+      G.players.forEach(x=>x.plague=false);
+      if(cur&&cur.alive&&G.plague.left>0){
+        const ord=seatOrderFrom(cur);
+        const nxt=ord.length>1?ord[1]:cur;
+        G.plague.holder=nxt.id; G.plague.left--; nxt.plague=true;
+        log(`🦠 瘟疫在列国间传播——现在 <b>${nxt.name}</b> 染疫。`,'sys');
+        if(G.plague.left<=0){ G.plague=null; log('🦠 瘟疫传满一整圈，渐渐平息了。','sys'); }
+      }else G.plague=null;
+    }
+    // 中山复国
+    G.players.forEach(p=>{
+      if(p.ruined&&G.round>=p.rebornRound){
+        p.ruined=false; p.rebornPenalty=2;
+        log(`🏯 <b>${p.name} 复国！</b>重立社稷——此后手牌上限 -2。`,'gold');
+        notify('🏯 中山 · 复国', `<b>${esc(p.name)}</b> 流亡两轮后<b>复国</b>！<br>代价：手牌上限 <b>-2</b>（当前上限 ${handLimit(p)}）。`);
+      }
+    });
+    if(G.pendingLiuyi){
+      const n=G.pendingLiuyi; G.pendingLiuyi=null;
+      log(`☰ 第 ${G.round} 轮开始——上轮【克己复礼】所掷六艺于此轮生效：<b>${n}【${LIUYI[n]}】</b>`,'gold');
+      await sleep(500);
+      await applyLiuyi(n,liuyiAffected());
+    }else if(G.era==='spring'){
+      const ts=G.players[G.taishi];
+      if(ts&&ts.alive){
+        log(`☰ 第 ${G.round} 轮开始，太史 <b>${ts.name}</b> 代周天子掷骰…`);
+        await sleep(600);
+        await rollLiuyi(alive(),'太史');
+      }
+    }else if(G.emperorId!=null&&P(G.emperorId)&&P(G.emperorId).alive){
+      const emp=P(G.emperorId);
+      log(`👑 天子 <b>${emp.name}</b> 掷骰…`);
+      await sleep(600);
+      const vas=alive().filter(x=>x!==emp&&isVassalOf(x,emp));
+      const group=[emp].concat(vas);
+      if(vas.length) log(`👑 天子与附庸（${vas.map(x=>x.name).join('、')}）共享本次六艺。`,'gold');
+      else log('👑 天子无附庸，六艺效果由天子独享。','gold');
+      await rollLiuyi(group, vas.length?'天子与附庸':'天子');
+    }
+    // 教程：确认完掷骰后立即弹出第一步引导（部署武将）
+    if(G.tutorial&&G.tut.step===0){ await sleep(300); tutAdvance(); }
+    // 教程：第二轮开始介绍君子六艺与时代更替
+    if(G.tutorial&&G.round>=2&&!G.tut.liuyiShown){
+      G.tut.liuyiShown=true;
+      notify('🎓 教程 · 君子六艺与时代更替',
+        `刚才开局时的<b>掷骰</b>就是「君子六艺」：1礼 2乐 3射 4御 5书 6数，效果持续一整轮。<br>
+         · 点击左侧状态栏的<b>「骰：」</b>可随时查看每个点数的详细效果<br>
+         · 春秋时代每轮由太史代周天子掷骰；<b>当周天子牌堆被抽空，时代更替进入战国</b>——取消掷骰与纳贡，摸牌改从普通牌堆进行<br>
+         · 战国时代由称帝者独占掷骰，克己复礼可额外触发掷骰`);
+    }
+    // 各玩家回合（座位可能已被【军争迂直】永久交换，故按快照顺序执行）
+    const order=[...G.players];
+    for(const p of order){
+      if(G.over) break;
+      if(!p.alive) continue;
+      await runTurn(p);
+    }
+    G.taishi=(G.taishi+1)%G.players.length;
+    G.round++;
+    cleanupTable();   // 桌面事件生效完毕后回到弃牌堆
+    await sleep(500);
+  }
+}
+function liuyiAffected(){
+  if(G.era==='spring') return alive();
+  if(G.emperorId!=null){
+    const emp=P(G.emperorId);
+    if(emp&&emp.alive){
+      const vas=alive().filter(x=>x!==emp&&isVassalOf(x,emp));
+      return [emp].concat(vas);
+    }
+  }
+  return alive();
+}
+initSetup();
+</script>
+</body>
+</html>
